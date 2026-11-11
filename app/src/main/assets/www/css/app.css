@@ -1168,3 +1168,6 @@ body.emn-acik #tost { z-index: 90; }
 .ym-skb .ym-kalan svg { display: block; }
 .emh-kahraman { background: #0b1530; }
 .emh-yazi { position: static; padding: 2px 18px 16px; background: none; }
+.kelam .bas .kim .kz { flex: none; margin-left: -3px; color: var(--soluk2); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.kelam .zaman.tam { margin-top: 12px; padding: 12px 0; border-top: 1px solid var(--cizgi-ince); border-bottom: 1px solid var(--cizgi-ince); font-size: 15px; color: var(--soluk); }
+.kelam .zaman.tam b { color: var(--yazi); font-weight: 700; }

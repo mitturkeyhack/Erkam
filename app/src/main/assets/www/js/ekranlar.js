@@ -21,10 +21,10 @@
   E.kelamKart = function (k, o) {
     o = o || {};
     var y = k.yazar || {};
-    var sagUst = o.zamanUstte ? E.once(k.olusturma) : (k.muhurler && k.muhurler[0] ? '#' + k.muhurler[0] : '');
+    var sagUst = !o.zamanUstte && k.muhurler && k.muhurler[0] ? '#' + k.muhurler[0] : '';
     var h = '<div class="kart kelam' + (o.cevap ? ' cevap' : '') + '" data-kelam="' + k.id + '">' +
       '<div class="bas"><button class="kim" data-is="yoldas" data-kunye="' + esc(y.kunye) + '">' + E.avatar(y) +
-      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + E.rozetVar(y) + '</button>' +
+      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + E.rozetVar(y) + (o.acik ? '' : '<span class="kz">· ' + esc(E.kelamSure(k.olusturma)) + '</span>') + '</button>' +
       (!o.zamanUstte && k.muhurler && k.muhurler[0]
         ? '<button class="tur tur-muhur" data-is="muhur-ac" data-muhur="' + esc(k.muhurler[0]) + '">' + esc(sagUst) + '</button>'
         : '<span class="tur">' + esc(sagUst) + '</span>') + '</div>' +
@@ -35,7 +35,7 @@
         return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m) + '">' + ikon('pound') + esc(m) + '</button>';
       }).join('') + '</div>';
     }
-    if (o.acik) h += '<div class="zaman">' + esc(E.once(k.olusturma)) + '</div>';
+    if (o.acik) h += '<div class="zaman tam">' + E.tamZaman(k.olusturma) + '</div>';
     h += '<div class="alt-satir">' +
       '<button data-is="tasdik" data-id="' + k.id + '" class="t' + (k.tasdikledim ? ' acik' : '') + '">' +
       ikon('star-crescent') + '<span>' + (k.tasdik_sayisi || 0) + '</span></button>';

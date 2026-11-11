@@ -48,6 +48,20 @@
     if (sn < 86400 * 7) return Math.floor(sn / 86400) + ' gün önce';
     return d.getDate() + ' ' + AYLAR[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
   };
+  // kelam kartı için X tarzı kısa süre: şimdi, 5dk, 3s, 11 Kas, 11 Kas 2025
+  E.kelamSure = function (t) {
+    var d = new Date(t), sn = (Date.now() - d.getTime()) / 1000;
+    if (isNaN(sn)) return '';
+    if (sn < 60) return 'şimdi';
+    if (sn < 3600) return Math.floor(sn / 60) + 'dk';
+    if (sn < 86400) return Math.floor(sn / 3600) + 's';
+    return d.getDate() + ' ' + AYLAR[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+  };
+  // kelam detayı için tam zaman: "00:44 · 12 Kas 2026"
+  E.tamZaman = function (t) {
+    var d = new Date(t);
+    return '<b>' + E.saat(t) + '</b> · ' + d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + d.getFullYear();
+  };
   // sohbet listesi için: "10:45", "Dün", "Pzt", "3 Kas"
   E.kisaZaman = function (t) {
     var d = new Date(t), b = new Date();
