@@ -12,6 +12,9 @@
   E.metinHtml = function (s) {
     return esc(s).replace(/(^|[^a-z0-9_@])@([a-z0-9_]{3,20})(?![a-z0-9_])/gi, function (t, on, k) {
       return on + '<span class="etiket" data-is="yoldas" data-kunye="' + k.toLowerCase() + '">@' + k + '</span>';
+    }).replace(/(^|[\s(])#([0-9A-Za-zÇĞİIÖŞÜçğıöşü_]{2,30})/g, function (t, on, m) {
+      // yazının içindeki #mühür de dokunulabilir olsun
+      return on + '<span class="etiket" data-is="muhur-ac" data-muhur="' + m.toLocaleLowerCase('tr') + '">#' + m + '</span>';
     });
   };
   E._kelamVeri = {};
