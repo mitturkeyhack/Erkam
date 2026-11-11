@@ -14,6 +14,7 @@ public class ErkamUygulama extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        try { UlakServisi.kanallar(this); } catch (Throwable ignored) { }
         firebaseBaslat(this, null);
     }
 

@@ -86,7 +86,16 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           message: {
             token: t,
-            android: { priority: "HIGH", ttl: "86400s" },
+            // notification bloğu: uygulama kapalı/temizlenmiş olsa bile bildirimi sistem gösterir
+            notification: { title: m.baslik, body: m.govde },
+            android: {
+              priority: "HIGH", ttl: "86400s",
+              notification: {
+                channel_id: String(v.tur) === "mesaj" ? "mesaj" : "meclis",
+                icon: "ic_bildirim", color: "#059669", tag: m.grup, sound: "default",
+                default_vibrate_timings: true, notification_priority: "PRIORITY_HIGH",
+              },
+            },
             data: {
               baslik: m.baslik, govde: m.govde, hedef: m.hedef, grup: m.grup, tur: String(v.tur),
               avatar, kisi: String(v.isim || ""), sayi: String(v.okunmamis ?? ""),
