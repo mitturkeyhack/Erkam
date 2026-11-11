@@ -231,3 +231,24 @@ returns jsonb language sql stable set search_path = '' as $$
     'bekleyen_basvuru', case when p.rol = 'yonetim' then (select count(*) from public.basvurular s where s.durum = 'yeni') end)
     from public.profiller p where p.id = (select auth.uid());
 $$;
+
+-- ---------- düzeltme: ceza_denetle her tabloda kendi alanını okusun ----------
+-- (PL/pgSQL CASE içinde new.yazar gibi alanlar diğer tablolarda "record new has no field" hatası veriyordu)
+create or replace function public.ceza_denetle()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare v_kisi uuid; r record; j jsonb := to_jsonb(new);
+begin
+  v_kisi := (j ->> case tg_table_name
+    when 'kelamlar' then 'yazar'
+    when 'mesajlar' then 'gonderen'
+    when 'tasdikler' then 'kisi_id'
+    when 'yoldasliklar' then 'takip_eden'
+    when 'sikayetler' then 'bildiren'
+  end)::uuid;
+  select uzak, susturma_bitis into r from public.profiller where id = v_kisi;
+  if r.uzak then raise exception 'uzaklastirildin'; end if;
+  if tg_table_name in ('kelamlar', 'mesajlar') and r.susturma_bitis > now() then
+    raise exception 'susturuldun';
+  end if;
+  return new;
+end $$;
