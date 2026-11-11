@@ -35,7 +35,7 @@
     if (o.acik) h += '<div class="zaman">' + esc(E.KATEGORI_AD[k.kategori] || '') + ' · ' + esc(E.once(k.olusturma)) + '</div>';
     h += '<div class="alt-satir">' +
       '<button data-is="tasdik" data-id="' + k.id + '" class="t' + (k.tasdikledim ? ' acik' : '') + '">' +
-      ikon(k.tasdikledim ? 'check-decagram' : 'check-decagram-outline') + '<span>' + (k.tasdik_sayisi || 0) + '</span></button>';
+      ikon('star-crescent') + '<span>' + (k.tasdik_sayisi || 0) + '</span></button>';
     if (!o.cevap) {
       h += '<button data-is="' + (o.acik ? 'cevap-odak' : 'kelam-ac') + '" data-id="' + k.id + '">' + ikon('comment-text-outline') +
         '<span>' + (k.cevap_sayisi || 0) + '</span></button>';
@@ -102,7 +102,7 @@
         var b = E.$('.alt-satir .t', kart);
         if (!b) return;
         b.className = 't' + (r.tasdikledim ? ' acik' : '');
-        b.innerHTML = ikon(r.tasdikledim ? 'check-decagram' : 'check-decagram-outline') + '<span>' + r.tasdik_sayisi + '</span>';
+        b.innerHTML = ikon('star-crescent') + '<span>' + r.tasdik_sayisi + '</span>';
         b.disabled = false;
       });
       el.disabled = false;

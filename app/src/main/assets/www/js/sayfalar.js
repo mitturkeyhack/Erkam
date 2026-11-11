@@ -330,7 +330,7 @@
   // ---------- Bildirimler ----------
   var BILDIRIM = {
     hosgeldin: ['sari', 'shield-check', function () { return 'ERKAM ağına hoş geldin yoldaş!'; }],
-    tasdik: ['yesil', 'check-decagram', function (k) { return k + ' kelamını tasdikledi.'; }],
+    tasdik: ['yesil', 'star-crescent', function (k) { return k + ' kelamını tasdikledi.'; }],
     cevap: ['yesil', 'comment-text-outline', function (k) { return k + ' kelamına cevap verdi.'; }],
     etiket: ['mavi', 'at', function (k) { return k + ' seni bir kelamda etiketledi.'; }],
     yoldas: ['yesil', 'account-plus', function (k) { return k + ' seni yoldaş edindi.'; }],
