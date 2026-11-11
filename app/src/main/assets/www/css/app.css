@@ -676,3 +676,5 @@ html[data-tema="acik"] .anahtar.acik { background: var(--vurgu); border-color: v
 .nesir .araclar .say.fazla circle.d { stroke: var(--tehlike); }
 .nesir .araclar .say i { font-style: normal; font-size: 11px; font-weight: 800; color: var(--soluk); position: relative; }
 .nesir .araclar .say.fazla i { color: var(--tehlike); }
+.kelam .alt-satir .ulak-gidiyor svg { animation: ulak 0.6s ease-in-out infinite alternate; }
+@keyframes ulak { to { transform: translateX(5px); } }

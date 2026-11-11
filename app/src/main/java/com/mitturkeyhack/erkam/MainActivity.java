@@ -418,6 +418,37 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void paylas(String metin, String resim64) {
+            runOnUiThread(() -> {
+                try {
+                    Intent i = new Intent(Intent.ACTION_SEND);
+                    i.putExtra(Intent.EXTRA_TEXT, metin);
+                    Uri uri = null;
+                    if (resim64 != null && !resim64.isEmpty()) {
+                        File kl = new File(getCacheDir(), "secim");
+                        if (!kl.exists()) kl.mkdirs();
+                        File f = new File(kl, "ulak.jpg");
+                        try (java.io.FileOutputStream out = new java.io.FileOutputStream(f)) {
+                            out.write(android.util.Base64.decode(resim64, android.util.Base64.DEFAULT));
+                        }
+                        uri = androidx.core.content.FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".dosya", f);
+                    }
+                    if (uri != null) {
+                        i.setType("image/jpeg");
+                        i.putExtra(Intent.EXTRA_STREAM, uri);
+                        i.setClipData(ClipData.newRawUri("ERKAM", uri));
+                        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } else {
+                        i.setType("text/plain");
+                    }
+                    Intent secici = Intent.createChooser(i, "Ulakla gönder");
+                    secici.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(secici);
+                } catch (Throwable e) { /* paylaşılamadı */ }
+            });
+        }
+
+        @JavascriptInterface
         public String surum() {
             try {
                 PackageInfo p = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);

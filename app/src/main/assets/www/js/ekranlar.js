@@ -14,6 +14,7 @@
       return on + '<span class="etiket" data-is="yoldas" data-kunye="' + k.toLowerCase() + '">@' + k + '</span>';
     });
   };
+  E._kelamVeri = {};
   E.kelamKart = function (k, o) {
     o = o || {};
     var y = k.yazar || {};
@@ -36,7 +37,9 @@
     if (!o.cevap) {
       h += '<button data-is="' + (o.acik ? 'cevap-odak' : 'kelam-ac') + '" data-id="' + k.id + '">' + ikon('handshake-outline') +
         '<span>' + (k.cevap_sayisi || 0) + '</span></button>';
+      h += '<button data-is="ulak" data-id="' + k.id + '" aria-label="Ulakla gönder">' + ikon('email-fast-outline') + '</button>';
     }
+    E._kelamVeri[k.id] = k;
     h += '<button data-is="heybe" data-id="' + k.id + '" class="heybe' + (k.heybemde ? ' acik' : '') + '" aria-label="Heybe">' +
       ikon(k.heybemde ? 'bag-personal' : 'bag-personal-outline') + '</button>';
     if (o.cevap) h += '<button data-is="kelam-menu" data-id="' + k.id + '" data-yazar="' + esc(y.id) + '" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>';
