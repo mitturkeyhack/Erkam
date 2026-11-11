@@ -1,0 +1,3 @@
+-- 005'teki kasa (vault) kullanımının yerine geçer: bkz. Supabase'e uygulanan 'anlik_bildirim_sirsiz' göçü.
+-- İstemci ayarı uygulama_ayar tablosunda (herkese açık bilgi), hizmet hesabı Edge Function gizli ayarı FIREBASE_HIZMET'te.
+-- Tetik sırsız; ulak_icerik her kaydı bir kez ve yalnız 3 dakikadan tazeyken verir.

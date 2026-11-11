@@ -112,6 +112,8 @@
       E.git('sura');
       canliBaslat();
       if (E.tercih('biyometrik') === '1') kilitle();
+      E.bildirimKur();
+      setTimeout(window.E_bildirimAc, 300);
     }).catch(function (h) {
       E.$('#acilis').hidden = true;
       if (/giris_gerekli|JWT|token|401/i.test(String(h && h.message))) { E.cikisYap(); return; }
@@ -134,7 +136,10 @@
     girisCiz();
   }
   E.cikisYap = function () {
-    return E.sb.auth.signOut().catch(function () { /* yine de yerelde kapat */ }).then(function () { if (E.oturum || !E.$('#g-dugme')) disariAl(); });
+    var once = E._fcm ? E.rpc('cihaz_sil', { p_token: E._fcm }).catch(function () {}) : Promise.resolve();
+    E._fcm = null;
+    try { if (window.Android && Android.bildirimDurdur) Android.bildirimDurdur(); } catch (e) { /* yok */ }
+    return once.then(function () { return E.sb.auth.signOut(); }).catch(function () { /* yine de yerelde kapat */ }).then(function () { if (E.oturum || !E.$('#g-dugme')) disariAl(); });
   };
 
   // ---------- Canlı bağlantı + nabız ----------
@@ -242,4 +247,36 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', baslat);
   else baslat();
+})();
+
+// ---------- Anlık bildirim (Firebase) ----------
+(function () {
+  var E = window.E;
+  E.bildirimAcik = function () { return E.tercih('bildirim') !== '0'; };
+  E.bildirimKur = function () {
+    if (!window.Android || !Android.bildirimBaslat || !E.bildirimAcik() || !E.ben) return;
+    E.rpc('firebase_ayar').then(function (a) {
+      if (a && a.apiKey) Android.bildirimBaslat(JSON.stringify(a));
+    }, function () { /* sunucu ayarı yok */ });
+  };
+  window.E_bildirimToken = function (t) {
+    if (!t || !E.ben || !E.bildirimAcik()) return;
+    E._fcm = t;
+    E.rpc('cihaz_kaydet', { p_token: t }).catch(function () {});
+  };
+  // bildirime dokununca ilgili yere git
+  window.E_bildirimAc = function () {
+    if (!window.Android || !Android.bekleyenHedef || !E.ben) return;
+    var h = Android.bekleyenHedef();
+    if (!h) return;
+    var i = h.indexOf(':'), tur = h.slice(0, i), d = h.slice(i + 1);
+    if (!d || d === 'null') return;
+    if (tur === 'kelam') E.kelamSayfa(d);
+    else if (tur === 'profil') E.yoldasSayfa(d);
+    else if (tur === 'sohbet') {
+      E.rpc('profil_getir', { p_kunye: d }).then(function (p) {
+        if (p) E.sohbetSayfa(p.profil || p);
+      }).catch(function () { E.yoldasSayfa(d); });
+    }
+  };
 })();

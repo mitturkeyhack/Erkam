@@ -65,6 +65,17 @@ public class MainActivity extends Activity {
     private boolean sayfaHazir = false;
     private ValueCallback<Uri[]> dosyaGeri;
     private boolean gorselIstegi = false;
+    static volatile boolean onde = false;
+    static MainActivity simdiki;
+    private String bekleyenHedef = null;
+    static final int BILDIRIM_IZNI = 43;
+
+    static void tokenBildir(String t) {
+        MainActivity a = simdiki;
+        if (a == null || a.web == null) return;
+        final String js = "window.E_bildirimToken&&window.E_bildirimToken(" + org.json.JSONObject.quote(t) + ")";
+        a.runOnUiThread(() -> { if (a.web != null) a.web.evaluateJavascript(js, null); });
+    }
     private String videoAyar;
     private VideoIsleyici video;
 
@@ -138,6 +149,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        simdiki = this;
+        hedefAl(getIntent());
         cokmeYakalayiciKur();
         String son = hatayiOku();
         if (son != null) { hataGoster(son); return; }
@@ -332,6 +345,28 @@ public class MainActivity extends Activity {
         }
     }
 
+    // ---------- bildirime dokununca ----------
+    private void hedefAl(Intent i) {
+        if (i == null) return;
+        String h = i.getStringExtra("hedef");
+        if (h != null && !h.isEmpty()) { bekleyenHedef = h; i.removeExtra("hedef"); }
+    }
+
+    @Override
+    protected void onNewIntent(Intent i) {
+        super.onNewIntent(i);
+        setIntent(i);
+        hedefAl(i);
+        if (bekleyenHedef != null && web != null)
+            web.evaluateJavascript("window.E_bildirimAc&&window.E_bildirimAc()", null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (simdiki == this) simdiki = null;
+        super.onDestroy();
+    }
+
     // ---------- video ----------
     private void videoBildir(org.json.JSONObject o) {
         final String js = "window.E_video&&window.E_video(" + o.toString() + ")";
@@ -375,11 +410,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        onde = true;
         if (web != null) web.onResume();
     }
 
     @Override
     protected void onPause() {
+        onde = false;
         if (web != null) web.onPause();
         super.onPause();
     }
@@ -415,6 +452,41 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 if (video != null && video.kimlik().equals(id)) { video.iptalEt(); video = null; }
             });
+        }
+
+        @JavascriptInterface
+        public void bildirimBaslat(String ayar) {
+            if (!ErkamUygulama.firebaseBaslat(getApplicationContext(), ayar)) return;
+            UlakServisi.kanallar(MainActivity.this);
+            if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED) {
+                runOnUiThread(() -> requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, BILDIRIM_IZNI));
+            }
+            try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                    .addOnSuccessListener(t -> { if (t != null) tokenBildir(t); });
+            } catch (Throwable e) { /* firebase hazır değil */ }
+        }
+
+        @JavascriptInterface
+        public void bildirimDurdur() {
+            try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().setAutoInitEnabled(false);
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().deleteToken();
+            } catch (Throwable e) { /* yok */ }
+        }
+
+        @JavascriptInterface
+        public String bildirimIzni() {
+            if (Build.VERSION.SDK_INT < 33) return "var";
+            return checkSelfPermission("android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED ? "var" : "yok";
+        }
+
+        @JavascriptInterface
+        public String bekleyenHedef() {
+            String h = bekleyenHedef;
+            bekleyenHedef = null;
+            return h == null ? "" : h;
         }
 
         @JavascriptInterface

@@ -394,7 +394,7 @@
       '<button class="satir" data-is="ayar-izole"><span class="ikon-kutu">' + ikon('incognito-circle') + '</span><span class="orta"><b>İzole Kimlik (Gizli Hesap)</b><span>Profilini sadece tasdikli yoldaşlar görür</span></span>' + anahtar(b.izole) + '</button></div>' +
       '<div class="bolum">SİSTEM TERCİHLERİ</div><div class="grup">' +
       '<button class="satir" data-is="ayar-fecr"><span class="ikon-kutu">' + ikon('theme-light-dark') + '</span><span class="orta"><b>Fecr Modu (Açık Tema)</b><span>Meclis arayüzünü aydınlatır</span></span>' + anahtar(E.tercih('fecr') !== '0') + '</button>' +
-      '<button class="satir" data-is="ayar-bildirim"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Meclis Bildirimleri</b><span>Yeni kelam ve mesajları bildir</span></span>' + anahtar(E.tercih('bildirim') !== '0') + '</button></div>' +
+      '<button class="satir" data-is="ayar-bildirim"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Meclis Bildirimleri</b><span>Mesaj, cevap, tasdik ve yoldaşlıkları telefonuna bildir</span></span>' + anahtar(E.tercih('bildirim') !== '0') + '</button></div>' +
       '<div class="bolum">HESAP YÖNETİMİ</div><div class="grup">' +
       '<button class="satir duz" data-is="cekmece-git" data-ekran="kunye">' + ikon('at') + '<span class="orta"><b>Künye (Kullanıcı Adı) Değiştir</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz" data-is="sifre-guncelle">' + ikon('key-chain') + '<span class="orta"><b>Şifre Güncelle</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
@@ -408,7 +408,14 @@
     E.kabukYenile(true);
   };
   E.is['ayar-bildirim'] = function () {
-    E.tercih('bildirim', E.tercih('bildirim') === '0' ? '1' : '0');
+    var ac = E.tercih('bildirim') === '0';
+    E.tercih('bildirim', ac ? '1' : '0');
+    if (ac) { E.bildirimKur(); E.tost('Bildirimler açıldı.', 'iyi'); }
+    else {
+      if (E._fcm) E.rpc('cihaz_sil', { p_token: E._fcm }).catch(function () {});
+      E._fcm = null;
+      try { if (window.Android && Android.bildirimDurdur) Android.bildirimDurdur(); } catch (e) { /* yok */ }
+    }
     E.kabukYenile(true);
   };
   E.is['ayar-izole'] = function () {
