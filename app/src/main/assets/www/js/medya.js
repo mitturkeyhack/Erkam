@@ -62,12 +62,15 @@
         x.open('POST', E.ayar.url + '/storage/v1/object/gorseller/' + yol.split('/').map(encodeURIComponent).join('/'));
         x.setRequestHeader('Authorization', 'Bearer ' + t);
         x.setRequestHeader('apikey', E.ayar.anahtar);
-        x.setRequestHeader('x-upsert', 'true');
         x.setRequestHeader('Content-Type', tur);
         x.upload.onprogress = function (o) { if (o.lengthComputable && ilerle) ilerle(Math.min(99, Math.round(o.loaded * 100 / o.total))); };
         x.onload = function () {
           if (x.status >= 200 && x.status < 300) { if (ilerle) ilerle(100); coz(yol); }
-          else red(new Error('Yükleme başarısız (' + x.status + ')'));
+          else {
+            var m = '';
+            try { m = JSON.parse(x.responseText).message || ''; } catch (e) { m = (x.responseText || '').slice(0, 80); }
+            red(new Error('Yükleme başarısız (' + x.status + (m ? ': ' + m : '') + ')'));
+          }
         };
         x.onerror = function () { red(new Error('Failed to fetch')); };
         x.onabort = function () { red(new Error('iptal')); };

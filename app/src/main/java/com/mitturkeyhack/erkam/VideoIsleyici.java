@@ -248,7 +248,6 @@ class VideoIsleyici {
             c.setRequestProperty("Authorization", "Bearer " + token);
             c.setRequestProperty("apikey", anahtar);
             c.setRequestProperty("Content-Type", tur);
-            c.setRequestProperty("x-upsert", "true");
             OutputStream cik = c.getOutputStream();
             byte[] tampon = new byte[64 * 1024];
             long giden = 0;
