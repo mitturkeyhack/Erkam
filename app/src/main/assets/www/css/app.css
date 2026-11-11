@@ -297,11 +297,20 @@ html[data-tema="acik"] .kapak { background-image: linear-gradient(135deg, #cbd5e
 .satir.duz { padding: 20px 20px 20px 22px; gap: 20px; }
 .satir.kirmizi, .satir.kirmizi > svg { color: var(--tehlike); }
 .satir .ok { color: var(--soluk2); width: 22px; height: 22px; }
-.anahtar { flex: none; width: 46px; height: 26px; border-radius: 13px; background: var(--cizgi); position: relative; transition: background 0.18s; }
-.anahtar::after { content: ""; position: absolute; top: -2px; left: -2px; width: 30px; height: 30px; border-radius: 50%; background: #94a3b8;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); transition: transform 0.18s, background 0.18s; }
-.anahtar.acik { background: rgba(16, 185, 129, 0.45); }
-.anahtar.acik::after { transform: translateX(22px); background: var(--vurgu); }
+.anahtar { flex: none; position: relative; width: 52px; height: 30px; border-radius: 15px; background: var(--kutu);
+  border: 1.5px solid var(--cizgi); transition: background 0.22s, border-color 0.22s; }
+.anahtar i { position: absolute; top: 2px; left: 2px; width: 23px; height: 23px; border-radius: 50%; background: var(--soluk2);
+  display: flex; align-items: center; justify-content: center; color: transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); transition: transform 0.22s cubic-bezier(.4,1.4,.6,1), background 0.22s, color 0.22s; }
+.anahtar i svg { width: 15px; height: 15px; transform: scale(0.4) rotate(-40deg); transition: transform 0.22s; }
+.anahtar.acik { background: var(--vurgu); border-color: var(--vurgu); }
+.anahtar.acik i { transform: translateX(22px); background: #fff; color: var(--vurgu); }
+.anahtar.acik i svg { transform: none; }
+.satir:active .anahtar i { width: 27px; }
+.satir:active .anahtar.acik i { transform: translateX(18px); }
+html[data-tema="acik"] .anahtar { background: #e2e8f0; border-color: #e2e8f0; }
+html[data-tema="acik"] .anahtar i { background: #fff; }
+html[data-tema="acik"] .anahtar.acik { background: var(--vurgu); border-color: var(--vurgu); }
 .etk { flex: none; padding: 5px 11px; border-radius: 10px; font-size: 13px; font-weight: 800; }
 .etk.kotu { background: var(--tehlike-zemin); border: 1px solid var(--tehlike); color: var(--tehlike); }
 .etk.iyi { background: var(--vurgu-zemin); border: 1px solid var(--vurgu-cizgi); color: var(--vurgu); }

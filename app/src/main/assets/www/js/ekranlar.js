@@ -390,7 +390,7 @@
   };
 
   // ---------- Nizam ----------
-  function anahtar(acik) { return '<span class="anahtar' + (acik ? ' acik' : '') + '"></span>'; }
+  function anahtar(acik) { return '<span class="anahtar' + (acik ? ' acik' : '') + '"><i>' + ikon('star-crescent') + '</i></span>'; }
   EKRAN.nizam = function (g) {
     var b = E.ben, u = (E.oturum && E.oturum.user) || {};
     var tasdikli = !!(u.email_confirmed_at || u.confirmed_at);
