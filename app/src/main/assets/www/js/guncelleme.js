@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var E = window.E, esc = E.esc, ikon = E.ikon;
-  var API = 'https://api.github.com/repos/mitturkeyhack/Erkam/releases/latest';
+  var API = 'https://api.github.com/repos/mitturkeyhack/Erkam/releases?per_page=15';
   var aktif = null;   // açık güncelleme penceresi
 
   function no(s) { var m = String(s || '').match(/(\d+)\.(\d+)\.(\d+)/); return m ? (+m[1]) * 1e6 + (+m[2]) * 1e3 + (+m[3]) : 0; }
@@ -24,7 +24,10 @@
     return fetch(API, { headers: { Accept: 'application/vnd.github+json' } }).then(function (r) {
       if (!r.ok) throw new Error('github ' + r.status);
       return r.json();
-    }).then(function (s) {
+    }).then(function (l) {
+      // "latest" etiketine güvenme: en yüksek numaralı sürümü seç (geç biten eski derlemeler karışmasın)
+      var s = (Array.isArray(l) ? l : [l]).filter(function (x) { return x && !x.draft && !x.prerelease && (x.assets || []).some(function (a) { return /\.apk$/i.test(a.name); }); })
+        .sort(function (a, b) { return no(b.tag_name) - no(a.tag_name); })[0] || {};
       var tag = s.tag_name || '', apk = (s.assets || []).filter(function (a) { return /\.apk$/i.test(a.name); })[0];
       if (!apk || no(tag) <= no(simdiki)) { if (elle) E.tost('ERKAM güncel. En son sürümü kullanıyorsun.', 'iyi'); return; }
       if (!elle && E.tercih('guncelleme_ertele') === tag + '|' + bugun()) return;

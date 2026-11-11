@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: apk-derle
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -128,6 +132,14 @@ jobs:
       - name: APK'yı adlandır
         run: cp app/build/outputs/apk/release/app-release.apk Erkam.apk
 
+      - name: Sıra denetimi (geç biten eski derleme "en son" olmasın)
+        id: sira
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          son=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" | grep -o '"tag_name": *"v0\.1\.[0-9]*"' | grep -o '[0-9]*"$' | tr -d '"')
+          if [ -n "$son" ] && [ "$son" -gt "$GITHUB_RUN_NUMBER" ]; then echo "enyeni=false" >> "$GITHUB_OUTPUT"; else echo "enyeni=true" >> "$GITHUB_OUTPUT"; fi
+
       - name: Release yayınla
         uses: softprops/action-gh-release@v2
         with:
@@ -135,4 +147,4 @@ jobs:
           name: ERKAM v0.1.${{ github.run_number }}
           body_path: notlar.txt
           files: Erkam.apk
-          make_latest: true
+          make_latest: ${{ steps.sira.outputs.enyeni }}
