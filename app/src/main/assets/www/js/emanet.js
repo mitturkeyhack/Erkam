@@ -34,7 +34,7 @@
     '<radialGradient id="eg-hale" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#34d399" stop-opacity=".45"/><stop offset="1" stop-color="#34d399" stop-opacity="0"/></radialGradient>' +
     '</defs>';
   function yildizlar() {
-    var s = '', n = [[22, 18, 1.2], [58, 34, .8], [96, 14, 1], [140, 28, .7], [188, 12, 1.1], [236, 30, .8], [262, 56, 1], [30, 60, .7], [120, 50, .6], [206, 48, .6]];
+    var s = '', n = [[22, 18, 1.2], [58, 34, .8], [96, 14, 1], [140, 28, .7], [188, 12, 1.1], [262, 88, .8], [262, 56, 1], [30, 60, .7], [120, 50, .6], [178, 64, .6]];
     n.forEach(function (p, i) { s += '<circle class="pirilti" style="animation-delay:' + (i * 0.37).toFixed(2) + 's" cx="' + p[0] + '" cy="' + p[1] + '" r="' + p[2] + '" fill="#fff"/>'; });
     return s;
   }
@@ -42,7 +42,9 @@
     // Safa tepesinin eteğinde, kapısından ışık sızan Erkam'ın evi
     ev: function () {
       return '<svg viewBox="0 0 280 180">' + DEF + '<rect width="280" height="180" fill="url(#eg-gok)"/>' + yildizlar() +
-        '<path d="M222 22a17 17 0 1 0 13 30 13.5 13.5 0 1 1-13-30Z" fill="url(#eg-alt)"/>' + ip('star', 236, 28, 10, '#fde68a') +
+        '<defs><mask id="eg-hm"><rect width="280" height="180" fill="#fff"/><circle cx="230" cy="39.6" r="14" fill="#000"/></mask><filter id="eg-bl" filterUnits="userSpaceOnUse" x="170" y="-10" width="110" height="100"><feGaussianBlur stdDeviation="4"/></filter></defs>' +
+        '<g filter="url(#eg-bl)" opacity=".6"><circle cx="224" cy="40" r="17" fill="#fbbf24" mask="url(#eg-hm)"/><path d="M232.40 33.20 L233.99 37.82 L238.87 37.90 L234.97 40.83 L236.40 45.50 L232.40 42.70 L228.40 45.50 L229.83 40.83 L225.93 37.90 L230.81 37.82Z" fill="#fbbf24"/></g>' +
+        '<circle cx="224" cy="40" r="17" fill="url(#eg-alt)" mask="url(#eg-hm)"/><path d="M232.40 33.20 L233.99 37.82 L238.87 37.90 L234.97 40.83 L236.40 45.50 L232.40 42.70 L228.40 45.50 L229.83 40.83 L225.93 37.90 L230.81 37.82Z" fill="url(#eg-alt)"/>' +
         '<path d="M0 132 C50 104 92 112 140 120 S230 100 280 116 V180 H0Z" fill="#163f3b"/>' +
         '<path d="M0 150 C60 132 120 142 170 140 S250 128 280 136 V180 H0Z" fill="#0f2f2c"/>' +
         '<ellipse cx="140" cy="142" rx="70" ry="20" fill="url(#eg-isik)" opacity=".55"/>' +
@@ -121,6 +123,8 @@
         '</svg>';
     }
   };
+
+  E.CIZIM = CIZIM;
 
   // ---------- tanıtım adımları ----------
   function maddeler(l) {
