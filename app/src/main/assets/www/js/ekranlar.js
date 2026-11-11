@@ -24,7 +24,7 @@
     var sagUst = o.zamanUstte ? E.once(k.olusturma) : (k.muhurler && k.muhurler[0] ? '#' + k.muhurler[0] : '');
     var h = '<div class="kart kelam' + (o.cevap ? ' cevap' : '') + '" data-kelam="' + k.id + '">' +
       '<div class="bas"><button class="kim" data-is="yoldas" data-kunye="' + esc(y.kunye) + '">' + E.avatar(y) +
-      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + (y.rol === 'yonetim' || y.onayli ? ikon('check-decagram') : '') + '</button>' +
+      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + E.rozetVar(y) + '</button>' +
       (!o.zamanUstte && k.muhurler && k.muhurler[0]
         ? '<button class="tur tur-muhur" data-is="muhur-ac" data-muhur="' + esc(k.muhurler[0]) + '">' + esc(sagUst) + '</button>'
         : '<span class="tur">' + esc(sagUst) + '</span>') + '</div>' +
@@ -204,7 +204,7 @@
       '<div class="cm-gb">ERKAM</div>' +
       [['adap', 'scale-balance', 'Adap ve Usul'], ['gayemiz', 'compass-rose', 'Gayemiz'], ['nizam', 'cog', 'Nizam']].map(it).join('') +
       (b.rol === 'yonetim' ? '<div class="cm-gb">YÖNETİM</div><button class="cm-it cm-yon" data-is="yonetim-ac">' + ikon('shield-crown-outline') + 'Yönetim Merkezi' +
-        (b.bekleyen_sikayet ? '<span class="cm-rozet">' + b.bekleyen_sikayet + '</span>' : '') + '</button>' : '') +
+        ((b.bekleyen_sikayet || 0) + (b.bekleyen_basvuru || 0) ? '<span class="cm-rozet">' + ((b.bekleyen_sikayet || 0) + (b.bekleyen_basvuru || 0)) + '</span>' : '') + '</button>' : '') +
       '</div><button class="cm-cik" data-is="cekmece-cikis">' + ikon('logout') + 'Meclisten Ayrıl</button></div>';
   };
   E.is['cekmece-cikis'] = function () { E.cekmeceKapat(); return E.is.cikis(); };
@@ -267,7 +267,7 @@
       kap.innerHTML = d.length ? d.map(function (s) {
         var k = s.kisi || {};
         return '<div class="kart sohbet-satir" data-is="sohbet-ac" data-id="' + esc(k.id) + '">' + E.avatar(k) +
-          '<div class="orta"><b>' + esc(k.isim || 'Yoldaş') + '</b><span>' + (s.benden ? 'Sen: ' : '') + esc(s.son) + '</span></div>' +
+          '<div class="orta"><b>' + esc(k.isim || 'Yoldaş') + E.rozetVar(k) + '</b><span>' + (s.benden ? 'Sen: ' : '') + esc(s.son) + '</span></div>' +
           '<div class="sag' + (s.okunmamis > 0 ? ' yeni' : '') + '">' + esc(E.kisaZaman(s.zaman)) +
           (s.okunmamis > 0 ? '<span class="sayi">' + s.okunmamis + '</span>' : '') + '</div></div>';
       }).join('') : '<div class="bos-not">' + ikon('message-text-outline') +
@@ -302,7 +302,7 @@
     var h = '<div class="kapak"' + kapak + '>' + (benim ? '<button class="dgm" data-is="gorsel-degis" data-tur="kapak" aria-label="Kapak görseli">' + ikon('camera-plus') + '</button>' : '') + '</div>' +
       '<div class="profil-bas"><div class="buyuk">' + E.avatar(p) +
       (benim ? '<button class="kam" data-is="gorsel-degis" data-tur="avatar" aria-label="Profil görseli">' + ikon('camera') + '</button>' : '') + '</div>' +
-      '<h3>' + esc(p.isim) + '</h3><div class="kunye">@' + esc(p.kunye) + '</div>' +
+      '<h3>' + esc(p.isim) + E.rozetVar(p) + '</h3><div class="kunye">@' + esc(p.kunye) + '</div>' +
       '<div class="bio"><span>' + esc(p.biyografi || '') + '</span>' + (benim ? '<button data-is="cekmece-git" data-ekran="kunye" aria-label="Düzenle">' + ikon('pencil') + '</button>' : '') + '</div>';
     if (!benim) {
       var d = p.iliski === 'onayli' ? ['cerceve', 'account-check', 'Yoldaşsınız'] : p.iliski === 'bekliyor' ? ['cerceve', 'account-clock', 'İstek Gönderildi'] : ['dolu', 'account-plus', 'Yoldaş Edin'];
@@ -401,6 +401,8 @@
       '<div class="bolum">SİSTEM TERCİHLERİ</div><div class="grup">' +
       '<button class="satir" data-is="ayar-fecr"><span class="ikon-kutu">' + ikon('theme-light-dark') + '</span><span class="orta"><b>Fecr Modu (Açık Tema)</b><span>Meclis arayüzünü aydınlatır</span></span>' + anahtar(E.tercih('fecr') !== '0') + '</button>' +
       '<button class="satir" data-is="ayar-bildirim"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Meclis Bildirimleri</b><span>Mesaj, cevap, tasdik ve yoldaşlıkları telefonuna bildir</span></span>' + anahtar(E.tercih('bildirim') !== '0') + '</button></div>' +
+      '<div class="bolum">EMANET VE HUKUK</div><div class="grup">' +
+      '<button class="satir duz" data-is="emanet-ac">' + ikon('shield-check-outline') + '<span class="orta"><b>Emanet ve Hukuk</b><span>KVKK, gizlilik, şartlar, verilerimi indir</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="bolum">HESAP YÖNETİMİ</div><div class="grup">' +
       '<button class="satir duz" data-is="cekmece-git" data-ekran="kunye">' + ikon('at') + '<span class="orta"><b>Künye (Kullanıcı Adı) Değiştir</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz" data-is="sifre-guncelle">' + ikon('key-chain') + '<span class="orta"><b>Şifre Güncelle</b></span>' + ikon('chevron-right', 'ok') + '</button>' +

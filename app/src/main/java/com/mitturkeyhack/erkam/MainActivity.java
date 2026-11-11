@@ -608,6 +608,43 @@ public class MainActivity extends Activity {
             });
         }
 
+        /** Metin dosyasını İndirilenler klasörüne kaydeder (Android 10+); eskilerde paylaşım penceresiyle verir. */
+        @JavascriptInterface
+        public boolean dosyaKaydet(String ad, String icerik, String tur) {
+            try {
+                String guvenliAd = ad.replaceAll("[^A-Za-z0-9._-]", "_");
+                byte[] veri = icerik.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                if (Build.VERSION.SDK_INT >= 29) {
+                    android.content.ContentValues d = new android.content.ContentValues();
+                    d.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, guvenliAd);
+                    d.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, tur);
+                    d.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS);
+                    Uri u = ctx.getContentResolver().insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, d);
+                    if (u == null) return false;
+                    try (java.io.OutputStream o = ctx.getContentResolver().openOutputStream(u)) {
+                        if (o == null) return false;
+                        o.write(veri);
+                    }
+                    return true;
+                }
+                File kl = new File(getCacheDir(), "secim");
+                if (!kl.exists()) kl.mkdirs();
+                File f = new File(kl, guvenliAd);
+                try (FileOutputStream o = new FileOutputStream(f)) { o.write(veri); }
+                final Uri uri = androidx.core.content.FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".dosya", f);
+                runOnUiThread(() -> {
+                    try {
+                        Intent i = new Intent(Intent.ACTION_SEND);
+                        i.setType(tur);
+                        i.putExtra(Intent.EXTRA_STREAM, uri);
+                        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(Intent.createChooser(i, "Verilerimi kaydet"));
+                    } catch (Throwable ignored) { }
+                });
+                return true;
+            } catch (Throwable e) { return false; }
+        }
+
         @JavascriptInterface
         public String surum() {
             try {

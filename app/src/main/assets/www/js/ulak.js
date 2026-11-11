@@ -105,8 +105,7 @@
       x.fillStyle = '#059669'; x.font = '800 40px ' + FONT; x.fillText(y.isim || 'Yoldaş', sx + 128, sy + 32);
       if (y.rol === 'yonetim' || y.onayli) {
         var nw = x.measureText(y.isim || 'Yoldaş').width;
-        x.save(); x.translate(sx + 128 + nw + 10, sy + 12); x.scale(40 / 24, 40 / 24); x.fillStyle = '#059669';
-        x.fill(new Path2D(window.IKON['check-decagram'])); x.restore();
+        E.rozetCanvas(x, sx + 128 + nw + 10, sy + 12, 40);
       }
       x.fillStyle = '#94a3b8'; x.font = '500 32px ' + FONT; x.fillText('@' + (y.kunye || ''), sx + 128, sy + 76);
       // metin

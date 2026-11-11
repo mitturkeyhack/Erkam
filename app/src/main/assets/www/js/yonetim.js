@@ -4,7 +4,7 @@
   var E = window.E, esc = E.esc, ikon = E.ikon;
 
   var SEKME = [['genel', 'view-dashboard-outline', 'Genel'], ['sikayet', 'flag-outline', 'Şikâyetler'],
-    ['yoldas', 'account-group-outline', 'Yoldaşlar'], ['duyuru', 'bullhorn-outline', 'Duyuru'], ['suffe', 'book-open-variant', 'Suffe']];
+    ['yoldas', 'account-group-outline', 'Yoldaşlar'], ['duyuru', 'bullhorn-outline', 'Duyuru'], ['suffe', 'book-open-variant', 'Suffe'], ['basvuru', 'gavel', 'KVKK']];
   var KAT = { siber: 'Siber Güvenlik', yazilim: 'Yazılım', adap: 'Adap' };
 
   function bos(ik, m) { return '<div class="bos-not">' + ikon(ik) + esc(m) + '</div>'; }
@@ -20,7 +20,7 @@
   function rozetler(k) {
     var r = '';
     if (k.rol === 'yonetim') r += '<em class="yr y">Yönetim</em>';
-    if (k.onayli) r += '<em class="yr o">' + ikon('check-decagram') + 'Onaylı</em>';
+    if (k.onayli) r += '<em class="yr o">' + E.rozet() + 'Onaylı</em>';
     if (k.susturma_bitis) r += '<em class="yr s">' + ikon('volume-off') + 'Susturuldu</em>';
     if (k.uzak) r += '<em class="yr u">' + ikon('shield-off-outline') + 'Uzak</em>';
     return r;
@@ -37,7 +37,7 @@
           '<div class="ym-bas"><span class="ym-kalkan">' + ikon('shield-crown-outline') + '</span>' +
           '<div><b>Yönetim Merkezi</b><small>Meclisin nabzı elinde</small></div></div>' +
           '<div class="ym-sekme">' + SEKME.map(function (s) {
-            return '<button data-s="' + s[0] + '">' + ikon(s[1]) + s[2] + (s[0] === 'sikayet' ? '<i class="ym-say" hidden></i>' : '') + '</button>';
+            return '<button data-s="' + s[0] + '">' + ikon(s[1]) + s[2] + (s[0] === 'sikayet' ? '<i class="ym-say" hidden></i>' : s[0] === 'basvuru' ? '<i class="ym-say ym-say2"' + ((E.ben && E.ben.bekleyen_basvuru) ? '>' + E.ben.bekleyen_basvuru : ' hidden>') + '</i>' : '') + '</button>';
           }).join('') + '</div></div>' +
         '<div class="ic ym-ic"></div>',
       kur: function (el) {
@@ -52,7 +52,7 @@
           [].forEach.call(sek.children, function (b) { b.classList.toggle('on', b.getAttribute('data-s') === s); });
           ic.scrollTop = 0;
           ic.innerHTML = cark();
-          ({ genel: genel, sikayet: sikayet, yoldas: yoldaslar, duyuru: duyuru, suffe: suffe })[s](ic, rozet, ac);
+          ({ genel: genel, sikayet: sikayet, yoldas: yoldaslar, duyuru: duyuru, suffe: suffe, basvuru: basvuru })[s](ic, rozet, ac);
         }
         sek.onclick = function (o) { var b = o.target.closest('[data-s]'); if (b) ac(b.getAttribute('data-s')); };
         tanim.donunce = function () { ac(aktif); };
@@ -185,6 +185,52 @@
     });
   }
 
+  // ---------- KVKK başvuruları ----------
+  function basvuru(ic) {
+    var durum = 'yeni';
+    function gun(b) {
+      var kalan = 30 - Math.floor((Date.now() - new Date(b.tarih).getTime()) / 864e5);
+      return b.durum === 'yeni' ? '<em class="ym-kalan' + (kalan <= 7 ? ' acil' : '') + '">' + ikon('timer-sand') + (kalan > 0 ? kalan + ' gün kaldı' : 'süre doldu') + '</em>' : '';
+    }
+    function yukle() {
+      var l = E.$('.ym-liste', ic);
+      l.innerHTML = cark();
+      E.rpc('yonetim_basvurular', { p_durum: durum }).then(function (r) {
+        if (durum === 'yeni') { var z = E.$('.ym-say2'); if (z) { z.hidden = !r.length; z.textContent = r.length; } if (E.ben) E.ben.bekleyen_basvuru = r.length; }
+        l.innerHTML = r.length ? r.map(function (b) {
+          var k = b.kisi || {};
+          return '<div class="ym-sk' + (b.durum === 'yeni' ? ' yeni' : '') + '" data-id="' + b.id + '">' +
+            '<div class="ym-skb">' + ikon('gavel') + '<span><b>' + esc((E.KVKK_TUR || {})[b.tur] || b.tur) + '</b> · ' + esc(E.once(b.tarih)) + '</span>' + gun(b) + '</div>' +
+            '<div class="ym-yazar">' + (k.id ? E.avatar(k) + '<b>' + esc(k.isim || '') + '</b><small>@' + esc(k.kunye || '') + '</small>' : '<b>Silinmiş hesap</b>') + '</div>' +
+            (b.eposta ? '<div class="ym-eposta">' + ikon('email-outline') + esc(b.eposta) + '</div>' : '') +
+            '<div class="ym-sebep">' + esc(b.metin) + '</div>' +
+            (b.cevap ? '<div class="ym-cevap">' + ikon('reply-outline') + '<span>' + esc(b.cevap) + '</span></div>' : '') +
+            (b.durum === 'yeni' ? '<div class="ym-dgm"><button class="yes" data-k="cevap">' + ikon('reply-outline') + 'Cevapla</button></div>' : '') + '</div>';
+        }).join('') : bos('gavel', durum === 'yeni' ? 'Bekleyen KVKK başvurusu yok.' : 'Burada başvuru yok.');
+      }).catch(hata(l));
+    }
+    ic.innerHTML = '<div class="ym-bilgi">' + ikon('information-outline') + '<span>KVKK başvuruları <b>en geç 30 gün</b> içinde cevaplanmalıdır. Cevabın yoldaşa bildirim olarak gider.</span></div>' +
+      '<div class="ym-cipler">' + [['yeni', 'Bekleyen'], ['cevaplandi', 'Cevaplanan'], ['hepsi', 'Hepsi']].map(function (x) {
+        return '<button data-d="' + x[0] + '"' + (x[0] === durum ? ' class="on"' : '') + '>' + x[1] + '</button>';
+      }).join('') + '</div><div class="ym-liste"></div>';
+    ic.onclick = function (o) {
+      var c = o.target.closest('[data-d]');
+      if (c) { durum = c.getAttribute('data-d'); [].forEach.call(c.parentNode.children, function (x) { x.classList.toggle('on', x === c); }); return yukle(); }
+      var b = o.target.closest('[data-k="cevap"]'), kart = o.target.closest('.ym-sk');
+      if (!b || !kart) return;
+      var id = +kart.getAttribute('data-id');
+      var p = E.katmanAc('<div class="ym-yb"><b>' + ikon('reply-outline') + 'Başvuruyu cevapla</b><small>Cevabın yoldaşa bildirim olarak gider ve başvuru kapanır.</small></div>' +
+        '<textarea class="girdi" id="ym-cvp" rows="6" maxlength="1500" placeholder="Örn: Verileriniz yalnızca hizmetin sunulması amacıyla Supabase ve Google ile paylaşılmaktadır..."></textarea>' +
+        '<div class="dgm"><button class="cerceve" data-is="katman-kapat">Vazgeç</button><button class="dolu" id="ym-cvp-g">Gönder</button></div>', 'yaprak kisa');
+      E.$('#ym-cvp-g', p).onclick = function () {
+        var g = this; g.disabled = true;
+        E.rpc('yonetim_basvuru_cevapla', { p_id: id, p_cevap: E.$('#ym-cvp', p).value }).then(function () { E.katmanKapat(); yukle(); })
+          .catch(function (h) { g.disabled = false; E.tost(E.hataMetni(h), 'kotu'); });
+      };
+    };
+    yukle();
+  }
+
   // ---------- Yoldaşlar ----------
   function yoldaslar(ic) {
     var filtre = 'hepsi', liste = [], z = 0, istek = 0;
@@ -232,7 +278,7 @@
       ben ? null : (k.uzak ? ['geri_al', 'account-reactivate-outline', 'Meclise geri al', 'yes'] : ['uzaklastir', 'shield-off-outline', 'Meclisten uzaklaştır', 'kir'])
     ].filter(Boolean);
     var p = E.katmanAc(
-      '<div class="ym-dt"><div class="ym-dtb">' + E.avatar(k, 'ym-dav') + '<div><b>' + esc(k.isim) + (k.rol === 'yonetim' || k.onayli ? ikon('check-decagram') : '') + '</b>' +
+      '<div class="ym-dt"><div class="ym-dtb">' + E.avatar(k, 'ym-dav') + '<div><b>' + esc(k.isim) + E.rozetVar(k) + '</b>' +
         '<small>@' + esc(k.kunye) + '</small></div></div>' +
         (rozetler(k) ? '<div class="ym-rz">' + rozetler(k) + '</div>' : '') +
         (k.susturma_bitis ? '<div class="ym-uyar">' + ikon('volume-off') + 'Susturuldu: ' + esc(susturmaYazi(k.susturma_bitis)) + '</div>' : '') +

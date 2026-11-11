@@ -206,7 +206,7 @@
           if (s !== sayac) return;
           var l = ((d && d.yoldaslar) || []).filter(function (k) { return k.id !== E.ben.id; });
           kap.innerHTML = l.length ? l.map(function (k) {
-            return '<button class="kisi-satir" data-sec="' + esc(k.id) + '">' + E.avatar(k) + '<span><b>' + esc(k.isim) + '</b><span>@' + esc(k.kunye) + '</span></span></button>';
+            return '<button class="kisi-satir" data-sec="' + esc(k.id) + '">' + E.avatar(k) + '<span><b>' + esc(k.isim) + E.rozetVar(k) + '</b><span>@' + esc(k.kunye) + '</span></span></button>';
           }).join('') : '<div class="bos-not">Yoldaş bulunamadı.</div>';
           kap._liste = l;
         }).catch(function (h) { kap.innerHTML = '<div class="bos-not">' + esc(E.hataMetni(h)) + '</div>'; });
@@ -307,7 +307,7 @@
             var h = '';
             if (d.yoldaslar && d.yoldaslar.length) {
               h += '<div class="ara-bolum">YOLDAŞLAR</div>' + d.yoldaslar.map(function (k) {
-                return '<button class="kisi-satir" data-is="yoldas" data-kunye="' + esc(k.kunye) + '">' + E.avatar(k) + '<span><b>' + esc(k.isim) + '</b><span>@' + esc(k.kunye) + '</span></span></button>';
+                return '<button class="kisi-satir" data-is="yoldas" data-kunye="' + esc(k.kunye) + '">' + E.avatar(k) + '<span><b>' + esc(k.isim) + E.rozetVar(k) + '</b><span>@' + esc(k.kunye) + '</span></span></button>';
               }).join('');
             }
             if (d.muhurler && d.muhurler.length) {
@@ -396,7 +396,7 @@
     var n = E.katmanAc('<div class="nb"><button class="kapat" data-is="katman-kapat" aria-label="Kapat">' + ikon('close') + '</button><h3>Yeni Neşir</h3>' +
       '<button class="gonder" disabled>Neşret</button></div>' +
       '<div class="nesir-ic"><div class="nk">' +
-        '<div class="nk-bas">' + E.avatar(ben) + '<div><b>' + esc(ben.isim || 'Yoldaş') + (ben.rol === 'yonetim' || ben.onayli ? ikon('check-decagram') : '') + '</b><small>@' + esc(ben.kunye || '') + '</small></div></div>' +
+        '<div class="nk-bas">' + E.avatar(ben) + '<div><b>' + esc(ben.isim || 'Yoldaş') + E.rozetVar(ben) + '</b><small>@' + esc(ben.kunye || '') + '</small></div></div>' +
         '<textarea rows="3" maxlength="600" placeholder="Meclise ne nakşetmek istersin?"></textarea>' +
         '<div class="oz"></div>' +
         '<div class="nk-muhur"><span class="nk-cipler"></span><label class="nk-ekle">' + ikon('pound') + '<input placeholder="mühür ekle" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="31"></label></div>' +
@@ -703,7 +703,7 @@
         }
         function satir(k) {
           return '<div class="yl-satir" data-kunye="' + esc(k.kunye) + '">' + E.avatar(k) +
-            '<div class="yl-o"><b>' + esc(k.isim || 'Yoldaş') + (k.rol === 'yonetim' || k.onayli ? ikon('check-decagram') : '') + '</b>' +
+            '<div class="yl-o"><b>' + esc(k.isim || 'Yoldaş') + E.rozetVar(k) + '</b>' +
             '<span>@' + esc(k.kunye) + (k.karsilikli && k.iliski !== 'ben' ? '<em>' + ikon('handshake-outline') + 'Karşılıklı</em>' : '') + '</span>' +
             (k.biyografi ? '<p>' + esc(k.biyografi) + '</p>' : '') + '</div>' + dugme(k) + '</div>';
         }

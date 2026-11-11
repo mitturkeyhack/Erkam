@@ -39,11 +39,13 @@
       (kayit ? '<div class="guc"><i></i><span>En az 8 karakter; harf ve rakam karıştır.</span></div>'
         : '<button class="unuttum" id="g-unuttum">Şifreni mi unuttun?</button>') +
       '<button class="dugme" id="g-dugme">' + (kayit ? 'Meclise Katıl' : 'Meclise Gir') + '</button>' +
+      (kayit ? '<div class="g-hukuk">Katılarak verilerinin <a data-hk="aydinlatma">KVKK Aydınlatma Metni</a> uyarınca işleneceğini öğrenmiş olursun. <a data-hk="sartlar">Kullanım Şartları</a>\'nı ilk girişte onaylayacaksın.</div>' : '') +
       '<button class="gecis" id="g-gecis">' + (kayit ? 'Zaten yoldaş mısın? <b>Meclise Gir</b>' : 'Henüz yoldaş değil misin? <b>Meclise Katıl</b>') + '</button>';
     g.hidden = false;
     gozBagla(g);
     E.$('#g-gecis').onclick = function () { girisModu = kayit ? 'giris' : 'kayit'; girisCiz(); };
     E.$('#g-dugme').onclick = kayit ? kayitOl : girisYap;
+    [].forEach.call(g.querySelectorAll('[data-hk]'), function (a) { a.onclick = function () { E.hukukMetni(a.getAttribute('data-hk'), true); }; });
     E.$('#g-sifre').onkeydown = function (o) { if (o.key === 'Enter') E.$('#g-dugme').click(); };
     if (!kayit) E.$('#g-unuttum').onclick = function () {
       var e = E.$('#g-eposta').value.trim();
@@ -304,14 +306,8 @@
       E.ben = b;
       E.$('#acilis').hidden = true;
       if (b.uzak) { uzakEkrani(); return; }
-      E.ekran = 'sura';
-      E.kabukCiz();
-      E.git('sura');
-      canliBaslat();
-      if (E.tercih('biyometrik') === '1') kilitle();
-      E.bildirimKur();
-      setTimeout(window.E_bildirimAc, 300);
-      setTimeout(function () { if (E.guncellemeDenetle) E.guncellemeDenetle(false); }, 2500);
+      if (E.emanetGerekli && E.emanetGerekli()) { E.emanetSihirbaz(meclisiAc); return; }
+      meclisiAc();
     }).catch(function (h) {
       E.$('#acilis').hidden = true;
       if (/giris_gerekli|JWT|token|401/i.test(String(h && h.message))) { E.cikisYap(); return; }
@@ -321,6 +317,18 @@
       E.$('#a-tekrar').onclick = function () { a.innerHTML = ikon('star-crescent') + '<span>Meclise bağlanılıyor...</span>'; profiliBekle(0); };
       E.$('#a-cik').onclick = function () { E.cikisYap(); };
     });
+  }
+  function meclisiAc() {
+    (function () {
+      E.ekran = 'sura';
+      E.kabukCiz();
+      E.git('sura');
+      canliBaslat();
+      if (E.tercih('biyometrik') === '1') kilitle();
+      E.bildirimKur();
+      setTimeout(window.E_bildirimAc, 300);
+      setTimeout(function () { if (E.guncellemeDenetle) E.guncellemeDenetle(false); }, 2500);
+    })();
   }
   // meclisten uzaklaştırılan yoldaş
   function uzakEkrani() {
@@ -336,6 +344,7 @@
   function disariAl() {
     canliDurdur();
     E.oturum = null; E.ben = null; girenKimlik = null;
+    if (E._emanetKapat) E._emanetKapat();
     E.veri.sura = null; E.veri.sohbetler = null; E.veri.suffe = null;
     E.tumKatmanlariKapat(); E.tumSayfalariKapat(); E.cekmeceKapat();
     var k = E.$('#kabuk'); k.hidden = true; k.innerHTML = '';

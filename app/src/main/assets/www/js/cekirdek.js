@@ -97,7 +97,13 @@
     uzaklastirildin: 'Meclisten uzaklaştırıldın.',
     duyuru_gecersiz: 'Duyuru 3-600 karakter olmalı.',
     baslik_gecersiz: 'Başlık en az 2 karakter olmalı.',
-    islem_gecersiz: 'Bu işlem yapılamadı.'
+    islem_gecersiz: 'Bu işlem yapılamadı.',
+    kunye_ayrilmis: 'Bu künye ERKAM\'a ayrılmıştır; başka bir künye seç.',
+    onay_eksik: 'Devam etmek için metinleri onaylaman gerekiyor.',
+    yas_kucuk: '15 yaşından küçükler meclise katılamaz.',
+    dogum_gecersiz: 'Geçerli bir doğum tarihi seç.',
+    basvuru_cok: 'Cevap bekleyen 3 başvurun var.',
+    cevap_kisa: 'Cevap en az 5 karakter olmalı.'
   };
   E.hataMetni = function (h) {
     var m = (h && (h.message || h.error_description || h.msg)) || String(h || '');
