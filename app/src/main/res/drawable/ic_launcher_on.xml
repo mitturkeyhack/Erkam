@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hilal-yıldız: Material Design Icons "star-crescent" (Apache 2.0) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="27" android:translateY="27" android:scaleX="2.25" android:scaleY="2.25">
+        <path android:fillColor="#10B981" android:pathData="M12.3 2Q12.1 2 12 2Q10 2 8.2 2.8Q6.3 3.5 4.9 4.9Q3.5 6.3 2.8 8.2Q2 10 2 12Q2 14 2.8 15.8Q3.5 17.7 4.9 19.1Q6.3 20.5 8.2 21.2Q10 22 12.1 22Q14.1 22 15.7 21.3Q17 20.8 18.5 19.5Q15.8 20.2 13.3 19.3Q11 18.5 9.5 16.5Q8 14.5 8 12Q8 9.5 9.5 7.5Q11 5.5 13.3 4.7Q15.8 3.8 18.5 4.5Q17.2 3.3 15.7 2.6Q14.1 2 12.3 2ZM16.8 6.2 15.3 9.7 11.6 10 14.5 12.5 13.6 16 16.8 14 20 16 19 12.5 22 10 18.3 9.7Z"/>
+    </group>
+</vector>

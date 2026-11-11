@@ -1,0 +1,47 @@
+plugins {
+    id 'com.android.application'
+}
+
+def runNo = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace 'com.mitturkeyhack.erkam'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.mitturkeyhack.erkam"
+        minSdk 26
+        targetSdk 35
+        versionCode runNo
+        versionName "0.1." + runNo
+    }
+
+    // İmza anahtarı depoda tutulmaz; derleme makinesi her seferinde geçici bir anahtar üretir
+    // (bkz. .github/workflows/apk.yml). Kalıcı anahtar için depo sırlarına IMZA eklenebilir.
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("IMZA_DOSYA") ?: "imza.jks")
+            storePassword System.getenv("IMZA_SIFRE") ?: ""
+            keyAlias "erkam"
+            keyPassword System.getenv("IMZA_SIFRE") ?: ""
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        encoding 'UTF-8'
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}

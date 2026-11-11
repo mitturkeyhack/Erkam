@@ -1,0 +1,107 @@
+name: APK Derle
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Supabase istemcisini indir
+        run: |
+          mkdir -p /tmp/sb && cd /tmp/sb && npm init -y >/dev/null
+          npm install --no-audit --no-fund --silent @supabase/supabase-js@2 esbuild
+          node -e '
+            const fs = require("fs"), path = require("path"), cp = require("child_process");
+            const d = "/tmp/sb/node_modules/@supabase/supabase-js";
+            const p = JSON.parse(fs.readFileSync(d + "/package.json", "utf8"));
+            const hedef = path.join(process.env.GITHUB_WORKSPACE, "app/src/main/assets/www/vendor");
+            fs.mkdirSync(hedef, { recursive: true });
+            const aday = [p.jsdelivr, p.unpkg, "dist/umd/supabase.js"].filter(Boolean).map((x) => path.join(d, x));
+            const f = aday.find((x) => fs.existsSync(x));
+            if (f) {
+              fs.copyFileSync(f, path.join(hedef, "supabase.js"));
+              console.log("supabase-js", p.version, "hazır paket:", f);
+            } else {
+              console.log("supabase-js", p.version, "hazır paket yok, esbuild ile paketleniyor");
+              cp.execSync("npx esbuild " + d + " --bundle --format=iife --global-name=supabase --platform=browser --outfile=" + path.join(hedef, "supabase.js"), { stdio: "inherit", cwd: "/tmp/sb" });
+            }
+          '
+          cd "$GITHUB_WORKSPACE"
+          ls -la app/src/main/assets/www/vendor/
+          grep -q createClient app/src/main/assets/www/vendor/supabase.js
+
+      - name: Sunucu anahtarını ekle
+        env:
+          SUPABASE_ANAHTAR: ${{ secrets.SUPABASE_ANAHTAR }}
+        run: |
+          if [ -n "$SUPABASE_ANAHTAR" ]; then
+            sed -i "s|__SUPABASE_ANAHTAR__|$SUPABASE_ANAHTAR|" app/src/main/assets/www/js/ayar.js
+            echo "ANAHTAR_VAR=1" >> "$GITHUB_ENV"
+          else
+            echo "::warning::SUPABASE_ANAHTAR sırrı yok; uygulama sunucuya bağlanamaz"
+          fi
+
+      - name: Uçtan uca deneme
+        id: deneme
+        if: env.ANAHTAR_VAR == '1'
+        continue-on-error: true
+        run: |
+          cd ci
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund --silent puppeteer-core
+          CHROME_BIN="$(which google-chrome || which chromium-browser || which chromium)" node deneme.js
+
+      - name: Deneme raporunu yayınla
+        if: always() && hashFiles('ci/rapor/rapor.json') != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ci/rapor
+          echo "${{ steps.deneme.outcome }}" > sonuc.txt
+          git init -q
+          git checkout -q -b ci-rapor
+          git add -A
+          git -c user.name="erkam-ci" -c user.email="ci@erkam.invalid" commit -q -m "Deneme raporu #${GITHUB_RUN_NUMBER}"
+          git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ci-rapor
+
+      - name: İmza anahtarı hazırla
+        run: |
+          IMZA_SIFRE="$(openssl rand -hex 16)"
+          echo "::add-mask::$IMZA_SIFRE"
+          keytool -genkeypair -keystore "$RUNNER_TEMP/imza.jks" -storetype JKS -storepass "$IMZA_SIFRE" -keypass "$IMZA_SIFRE" \
+            -alias erkam -keyalg RSA -keysize 2048 -validity 10950 -dname "CN=Erkam, O=mitturkeyhack, C=TR"
+          echo "IMZA_DOSYA=$RUNNER_TEMP/imza.jks" >> "$GITHUB_ENV"
+          echo "IMZA_SIFRE=$IMZA_SIFRE" >> "$GITHUB_ENV"
+
+      - name: APK derle
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: APK'yı adlandır
+        run: cp app/build/outputs/apk/release/app-release.apk Erkam.apk
+
+      - name: Release yayınla
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.1.${{ github.run_number }}
+          name: ERKAM v0.1.${{ github.run_number }}
+          body: |
+            Telefona indir: Erkam.apk dosyasına dokun.
+          files: Erkam.apk
+          make_latest: true
