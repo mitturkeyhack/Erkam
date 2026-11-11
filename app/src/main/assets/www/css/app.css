@@ -678,3 +678,38 @@ html[data-tema="acik"] .anahtar.acik { background: var(--vurgu); border-color: v
 .nesir .araclar .say.fazla i { color: var(--tehlike); }
 .kelam .alt-satir .ulak-gidiyor svg { animation: ulak 0.6s ease-in-out infinite alternate; }
 @keyframes ulak { to { transform: translateX(5px); } }
+
+/* ---------- Giriş: şifre gözü, güç, kod ekranı ---------- */
+.giris .sifre-kap { position: relative; display: block; }
+.giris .sifre-kap .alan { padding-right: 54px; }
+.giris .goz { position: absolute; right: 6px; top: 0; height: 54px; width: 46px; display: flex; align-items: center; justify-content: center; color: var(--soluk); }
+.giris .goz svg { width: 22px; height: 22px; }
+.giris .unuttum { align-self: flex-end; margin: -4px 4px 16px; color: var(--vurgu); font-size: 14px; font-weight: 700; }
+.giris .guc { display: flex; flex-direction: column; gap: 7px; margin: -4px 4px 16px; }
+.giris .guc i { display: block; height: 5px; border-radius: 3px; background: var(--cizgi); position: relative; overflow: hidden; }
+.giris .guc i::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 3px; transition: width 0.25s, background 0.25s; }
+.giris .guc.g1 i::after { width: 25%; background: #ef4444; }
+.giris .guc.g2 i::after { width: 50%; background: #f59e0b; }
+.giris .guc.g3 i::after { width: 75%; background: #10b981; }
+.giris .guc.g4 i::after { width: 100%; background: #059669; }
+.giris .guc span { font-size: 12.5px; color: var(--soluk); }
+.giris .kod-simge { width: 86px; height: 86px; margin: 0 auto 22px; border-radius: 28px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #10b981, #047857); color: #fff; box-shadow: 0 14px 34px rgba(5, 150, 105, 0.35); }
+.giris .kod-simge svg { width: 46px; height: 46px; }
+.giris h2 { margin: 0 0 10px; text-align: center; font-size: 26px; font-weight: 900; }
+.giris .kod-acik { margin: 0 6px 24px; text-align: center; color: var(--soluk); font-size: 15px; line-height: 1.5; }
+.giris .kod-acik b { color: var(--yazi); word-break: break-all; }
+.giris .kod-kap { position: relative; display: block; margin-bottom: 20px; }
+.giris .kod-kap input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; caret-color: transparent; z-index: 1; }
+.giris .kod-kutu { display: flex; gap: 9px; justify-content: center; }
+.giris .kod-kutu span { flex: 1; max-width: 54px; height: 62px; border-radius: 16px; background: var(--kart); border: 2px solid var(--cizgi);
+  display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: var(--yazi); transition: border-color 0.15s, transform 0.15s; }
+.giris .kod-kutu span.dolu { border-color: var(--vurgu); }
+.giris .kod-kutu span.imlec { border-color: var(--vurgu); box-shadow: 0 0 0 4px var(--vurgu-zemin); }
+.giris .kod-kutu span.imlec::after { content: ""; width: 2px; height: 28px; background: var(--vurgu); animation: imlec 1s steps(1) infinite; }
+@keyframes imlec { 50% { opacity: 0; } }
+.giris .kod-kutu.salla { animation: salla 0.4s; }
+@keyframes salla { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+.giris .gecis:disabled { opacity: 0.75; }
+.giris .gecis.ince { margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; }
+.giris .gecis.ince svg { width: 18px; height: 18px; }

@@ -99,7 +99,11 @@
     for (var k in HATA) if (m.indexOf(k) !== -1) return HATA[k];
     if (/Failed to fetch|NetworkError|Load failed|network/i.test(m)) return 'Bağlantı kurulamadı. İnternetini kontrol et.';
     if (/Invalid login credentials/i.test(m)) return 'E-posta veya şifre hatalı.';
-    if (/Email not confirmed/i.test(m)) return 'E-postan henüz tasdik edilmemiş. Gelen kutundaki bağlantıya dokun, sonra tekrar dene.';
+    if (/Token has expired|otp_expired|invalid.*otp|otp.*invalid/i.test(m)) return 'Kod hatalı ya da süresi dolmuş. Kontrol et ya da yeni kod iste.';
+    if (/Email not confirmed/i.test(m)) return 'E-postan henüz tasdik edilmemiş.';
+    if (/you can only request this after (\d+)/i.test(m)) return 'Yeni kod için ' + m.match(/after (\d+)/i)[1] + ' saniye bekle.';
+    if (/Error sending|sending (confirmation|recovery|magic)/i.test(m)) return 'E-posta gönderilemedi. Biraz sonra tekrar dene.';
+    if (/User not found/i.test(m)) return 'Bu e-postayla kayıtlı bir yoldaş yok.';
     if (/already registered|already been registered/i.test(m)) return 'Bu e-posta ile zaten bir yoldaş kayıtlı.';
     if (/Password should be at least/i.test(m)) return 'Şifre en az 6 karakter olmalı.';
     if (/valid email|invalid format|is invalid/i.test(m)) return 'Geçerli bir e-posta adresi yaz.';
