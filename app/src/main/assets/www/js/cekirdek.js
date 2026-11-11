@@ -69,6 +69,8 @@
   E.tost = function (metin, tur) {
     var kutu = E.$('#tost');
     if (!kutu) return;
+    // aynı uyarı zaten ekrandaysa ikinci kez gösterme
+    for (var i = 0; i < kutu.children.length; i++) if (kutu.children[i].textContent === metin) return;
     var el = document.createElement('div');
     if (tur) el.className = tur;
     el.textContent = metin;

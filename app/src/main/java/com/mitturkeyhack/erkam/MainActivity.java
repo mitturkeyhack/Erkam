@@ -64,6 +64,7 @@ public class MainActivity extends Activity {
     private FrameLayout kok;
     private boolean sayfaHazir = false;
     private ValueCallback<Uri[]> dosyaGeri;
+    private boolean gorselIstegi = false;
     private String videoAyar;
     private VideoIsleyici video;
 
@@ -233,6 +234,7 @@ public class MainActivity extends Activity {
                     String tur = "image/*";
                     String[] turler = p != null ? p.getAcceptTypes() : null;
                     if (turler != null && turler.length > 0 && turler[0] != null && turler[0].startsWith("video")) tur = "video/*";
+                    gorselIstegi = tur.startsWith("image");
                     Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                     i.addCategory(Intent.CATEGORY_OPENABLE);
                     i.setType(tur);
@@ -292,7 +294,42 @@ public class MainActivity extends Activity {
                 secilen = new Uri[]{veri.getData()};
             }
         }
-        geri.onReceiveValue(secilen);
+        if (secilen == null || !gorselIstegi) { geri.onReceiveValue(secilen); return; }
+        // Fotoğrafları telefonda çöz: HEIC/HEIF ve çok büyük (50 MP) kamera fotoğraflarını
+        // 2400 piksele indirip JPEG'e çevir; WebView bunları her zaman açabilsin.
+        final Uri[] liste = secilen;
+        new Thread(() -> {
+            File kl = new File(getCacheDir(), "secim");
+            if (!kl.exists()) kl.mkdirs();
+            File[] eski = kl.listFiles();
+            if (eski != null) for (File f : eski) if (System.currentTimeMillis() - f.lastModified() > 600000) f.delete();
+            Uri[] sonucUri = new Uri[liste.length];
+            for (int k = 0; k < liste.length; k++) sonucUri[k] = gorselHazirla(liste[k], kl, k);
+            runOnUiThread(() -> geri.onReceiveValue(sonucUri));
+        }).start();
+    }
+
+    private Uri gorselHazirla(Uri uri, File kl, int sira) {
+        try {
+            String mime = getContentResolver().getType(uri);
+            if (mime != null && mime.equals("image/gif")) return uri;
+            if (Build.VERSION.SDK_INT < 28) return uri;
+            android.graphics.ImageDecoder.Source kaynak = android.graphics.ImageDecoder.createSource(getContentResolver(), uri);
+            android.graphics.Bitmap bmp = android.graphics.ImageDecoder.decodeBitmap(kaynak, (d, bilgi, src) -> {
+                int w = bilgi.getSize().getWidth(), h = bilgi.getSize().getHeight();
+                float o = Math.min(1f, 2400f / Math.max(w, h));
+                if (o < 1f) d.setTargetSize(Math.max(1, Math.round(w * o)), Math.max(1, Math.round(h * o)));
+                d.setAllocator(android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE);
+            });
+            File f = new File(kl, "g" + System.currentTimeMillis() + "_" + sira + ".jpg");
+            try (java.io.FileOutputStream out = new java.io.FileOutputStream(f)) {
+                bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, out);
+            }
+            bmp.recycle();
+            return androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".dosya", f);
+        } catch (Throwable e) {
+            return uri;  // çevrilemezse aslını gönder
+        }
     }
 
     // ---------- video ----------
