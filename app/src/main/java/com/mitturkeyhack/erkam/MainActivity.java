@@ -190,7 +190,7 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(true);
         s.setSupportZoom(false);
         s.setTextZoom(100);
-        s.setMediaPlaybackRequiresUserGesture(true);
+        s.setMediaPlaybackRequiresUserGesture(false);
         web.addJavascriptInterface(new Kopru(this), "Android");
 
         web.setWebViewClient(new WebViewClient() {

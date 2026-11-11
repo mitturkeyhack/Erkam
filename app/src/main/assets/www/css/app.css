@@ -514,14 +514,39 @@ html[data-tema="acik"] .anahtar.acik { background: var(--vurgu); border-color: v
 .km1 .km-k img { height: auto; max-height: 420px; }
 .km3 .km-k:first-child { grid-column: span 2; height: 190px; }
 .km-k img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.km-v { position: relative; display: block; height: 0; background: #0f172a; }
-.km-v img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.km-oynat { position: absolute; left: 50%; top: 50%; width: 62px; height: 62px; margin: -31px 0 0 -31px; border-radius: 50%;
-  background: rgba(16, 185, 129, 0.92); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3); }
-.km-oynat svg { width: 34px; height: 34px; margin-left: 3px; }
-.km-sure { position: absolute; left: 10px; bottom: 10px; display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 8px;
-  background: rgba(15, 23, 42, 0.75); color: #fff; font-size: 12px; font-weight: 700; }
-.km-sure svg { width: 15px; height: 15px; }
+.km-v { position: relative; display: block; height: 0; background: #0f172a; overflow: hidden; }
+.km-v video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #0f172a; }
+.km-isaret { position: absolute; left: 50%; top: 50%; width: 66px; height: 66px; margin: -33px 0 0 -33px; border-radius: 50%; pointer-events: none;
+  background: rgba(15, 23, 42, 0.55); color: #fff; display: flex; align-items: center; justify-content: center; opacity: 0; }
+.km-isaret svg { width: 36px; height: 36px; }
+.km-isaret.goster { animation: isaret 0.7s ease-out; }
+@keyframes isaret { 0% { opacity: 0; transform: scale(0.7); } 25% { opacity: 1; transform: scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: scale(1.15); } }
+.km-kalan { position: absolute; left: 10px; bottom: 12px; padding: 3px 8px; border-radius: 8px; background: rgba(15, 23, 42, 0.7);
+  color: #fff; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
+.km-ses, .km-tam { position: absolute; bottom: 10px; width: 34px; height: 34px; border-radius: 50%; background: rgba(15, 23, 42, 0.7);
+  color: #fff; display: flex; align-items: center; justify-content: center; }
+.km-ses { right: 52px; } .km-tam { right: 10px; }
+.km-ses svg, .km-tam svg { width: 19px; height: 19px; }
+.km-cizgi { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, 0.25); pointer-events: none; }
+.km-cizgi i { display: block; height: 100%; width: 0; background: #10b981; transition: width 0.25s linear; }
+.km-v.bekliyor .km-isaret { opacity: 1; animation: none; background: transparent; }
+.km-v.bekliyor .km-isaret::after { content: ''; width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,.3); border-top-color: #fff; animation: don 0.8s linear infinite; }
+@keyframes don { to { transform: rotate(360deg); } }
+
+/* tam ekran video */
+.tv { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #000; transition: transform 0.05s; }
+.tv video { width: 100%; max-height: 100%; display: block; }
+.tv .izle-x, .tv-alt { transition: opacity 0.25s; opacity: 0; pointer-events: none; }
+.tv.acik .izle-x, .tv.acik .tv-alt { opacity: 1; pointer-events: auto; }
+.tv-alt { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 14px 22px; display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)); color: #fff; }
+.tv-oy, .tv-ses { width: 40px; height: 40px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tv-oy svg, .tv-ses svg { width: 26px; height: 26px; }
+.tv-zaman { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.tv-cubuk { flex: 1; padding: 12px 0; }
+.tv-dolu { position: relative; height: 4px; width: 0; background: #10b981; border-radius: 2px; box-shadow: -2000px 0 0 2000px transparent; }
+.tv-cubuk { background: linear-gradient(rgba(255,255,255,.28), rgba(255,255,255,.28)) center / 100% 4px no-repeat; }
+.tv-dolu i { position: absolute; right: -7px; top: -5px; width: 14px; height: 14px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.3); }
 
 /* ---------- Tam ekran izleyici ---------- */
 .izle { position: absolute; inset: 0; z-index: 31; background: #000; display: flex; align-items: center; justify-content: center; animation: belir 0.15s; }
