@@ -23,10 +23,7 @@
       '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + (y.rol === 'yonetim' ? ikon('check-decagram') : '') + '</button>' +
       '<span class="tur">' + esc(sagUst) + '</span></div>' +
       '<div class="metin"' + (o.acik ? '' : ' data-is="kelam-ac" data-id="' + k.id + '"') + '>' + E.metinHtml(k.icerik) + '</div>';
-    if (k.gorsel_yol) {
-      h += '<div class="gorsel"' + (o.acik ? '' : ' data-is="kelam-ac" data-id="' + k.id + '"') + '><img src="' +
-        esc(E.gorselUrl(k.gorsel_yol)) + '" alt="" loading="lazy"></div>';
-    }
+    h += E.medyaHtml(k);
     if ((o.muhurlu || o.acik) && k.muhurler && k.muhurler.length) {
       h += '<div class="muhurler">' + k.muhurler.map(function (m) {
         return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m) + '">' + ikon('stamper') + esc(m) + '</button>';

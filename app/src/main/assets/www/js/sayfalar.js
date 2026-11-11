@@ -381,14 +381,29 @@
   };
 
   // ---------- Yeni Neşir ----------
+  // Medya seçildiği an küçültülüp yüklenmeye başlar; Neşret'e basınca "nakşediliyor" ekranı kalanı bekler.
   E.is.nesret = function () {
-    var kategori = 'ilim', gorsel = null, mesgul = false;
+    var kategori = 'ilim', medya = [], mesgul = false, naksedildi = false, sira = 0;
     var n = E.katmanAc('<div class="nb"><button class="kapat" data-is="katman-kapat" aria-label="Kapat">' + ikon('close') + '</button><h3>Yeni Neşir</h3>' +
       '<button class="gonder" disabled>Neşret</button></div><div class="cipler"></div>' +
-      '<textarea maxlength="600" placeholder="İlmini veya tecrübeni meclise nakşet..."></textarea><div class="oz"></div>' +
+      '<div class="nesir-ic"><textarea maxlength="600" placeholder="İlmini veya tecrübeni meclise nakşet..."></textarea><div class="oz"></div></div>' +
       '<label class="muhur-kutu">' + ikon('stamper') + '<span>Mühür:</span><input placeholder="Örn: sibergüvenlik, kpss" autocapitalize="none" autocomplete="off" maxlength="120"></label>' +
-      '<div class="araclar"><button data-a="gorsel" aria-label="Görsel ekle">' + ikon('image-plus') + '</button><button data-a="liste" aria-label="Liste">' + ikon('format-list-bulleted') + '</button><span class="say">0/500</span></div>', 'nesir');
-    var alan = E.$('textarea', n), gonder = E.$('.gonder', n), say = E.$('.say', n), cip = E.$('.cipler', n), oz = E.$('.oz', n), muhur = E.$('.muhur-kutu input', n);
+      '<div class="araclar"><button data-a="foto" aria-label="Fotoğraf ekle">' + ikon('image-plus') + '</button>' +
+      '<button data-a="video" aria-label="Video ekle">' + ikon('video-plus') + '</button>' +
+      '<button data-a="liste" aria-label="Liste">' + ikon('format-list-bulleted') + '</button><span class="say">0/500</span></div>', 'nesir');
+    var alan = E.$('textarea', n), gonder = E.$('.gonder', n), say = E.$('.say', n), cip = E.$('.cipler', n), oz = E.$('.oz', n),
+      muhur = E.$('.muhur-kutu input', n), btnFoto = E.$('[data-a="foto"]', n), btnVideo = E.$('[data-a="video"]', n);
+
+    // katman kapanırsa: yarım kalan yüklemeleri durdur, yüklenenleri sil
+    n.parentNode._kapaninca = function () {
+      if (naksedildi) return;
+      medya.forEach(function (m) {
+        if (m.yukleme && m.yukleme.iptal) m.yukleme.iptal();
+        if (m.tur === 'video') E.videoIptal(m.id);
+      });
+      E.dosyaSil([].concat.apply([], medya.map(function (m) { return [m.yol, m.kapak]; })));
+    };
+
     function cipCiz() {
       cip.innerHTML = ['ilim', 'tecrube', 'infak', 'adap'].map(function (k) {
         return '<button class="cip' + (k === kategori ? ' aktif' : '') + '" data-kat="' + k + '">' + E.KATEGORI_AD[k] + '</button>';
@@ -398,42 +413,218 @@
       var u = alan.value.trim().length;
       say.textContent = u + '/500';
       say.className = 'say' + (u > 500 ? ' fazla' : '');
-      gonder.disabled = mesgul || u < 1 || u > 500;
+      gonder.disabled = mesgul || u > 500 || (u < 1 && !medya.length) || medya.some(function (m) { return m.durum === 'hata'; });
+      var video = medya.some(function (m) { return m.tur === 'video'; });
+      btnFoto.disabled = video || medya.length >= E.FOTO_EN;
+      btnVideo.disabled = medya.length > 0;
     }
+
+    // ---- medya kutuları ----
+    function halka(m) {
+      if (m.durum === 'tamam') return '<span class="nm-ok">' + ikon('check') + '</span>';
+      if (m.durum === 'hata') return '<span class="nm-o"><button class="nm-tekrar" data-tekrar="' + m.id + '">' + ikon('refresh') + 'Tekrar dene</button></span>';
+      var y = genel(m);
+      return '<span class="nm-o"><span class="ring" style="--p:' + y + '%"><i>' + (m.durum === 'hazirlaniyor' ? '' : '%' + y) + '</i></span></span>';
+    }
+    function medyaCiz() {
+      if (!medya.length) { oz.innerHTML = ''; durum(); return; }
+      var video = medya[0].tur === 'video';
+      oz.innerHTML = '<div class="nm nm' + Math.min(medya.length, 4) + (video ? ' nm-v' : '') + '">' + medya.map(function (m) {
+        return '<div class="nm-k" data-id="' + m.id + '">' + (m.onizleme ? '<img src="' + m.onizleme + '" alt="">' : '') +
+          '<span class="nm-h">' + halka(m) + '</span>' +
+          (m.tur === 'video' && m.sure ? '<span class="nm-s">' + ikon('video') + E.sureYaz(m.sure) + '</span>' : '') +
+          '<button class="nm-x" data-sil="' + m.id + '" aria-label="Kaldır">' + ikon('close') + '</button></div>';
+      }).join('') + '</div><div class="nm-not"></div>';
+      notGuncelle();
+      durum();
+    }
+    function medyaGuncelle(m) {
+      var k = E.$('.nm-k[data-id="' + m.id + '"] .nm-h', oz);
+      if (k) k.innerHTML = halka(m);
+      notGuncelle();
+      durum();
+    }
+    function notGuncelle() {
+      var el = E.$('.nm-not', oz);
+      if (!el) return;
+      var v = medya.filter(function (m) { return m.tur === 'video'; })[0];
+      var f = medya.filter(function (m) { return m.tur === 'foto' && m.sonra; });
+      var t = '';
+      if (v && v.durum === 'hata') t = v.mesaj || 'Video yüklenemedi.';
+      else if (v && v.durum === 'sikistiriliyor') t = 'Video sıkıştırılıyor' + (v.once ? ': ' + E.boyutYaz(v.once) : '') + ' · %' + (v.yuzde || 0);
+      else if (v && v.sonra) t = 'Video küçültüldü: ' + E.boyutYaz(v.once) + ' → ' + E.boyutYaz(v.sonra);
+      else if (f.length) t = 'Görseller küçültüldü: ' + E.boyutYaz(toplam(f, 'once')) + ' → ' + E.boyutYaz(toplam(f, 'sonra'));
+      el.textContent = t;
+    }
+    function toplam(l, a) { return l.reduce(function (s, m) { return s + (m[a] || 0); }, 0); }
+    // bir medyanın genel ilerlemesi (0-100)
+    function genel(m) {
+      if (m.durum === 'tamam') return 100;
+      if (m.tur === 'video') {
+        if (m.durum === 'sikistiriliyor') return Math.round((m.yuzde || 0) * 0.5);
+        if (m.durum === 'yukleniyor') return 50 + Math.round((m.yuzde || 0) * 0.5);
+        return 0;
+      }
+      return m.durum === 'yukleniyor' ? (m.yuzde || 0) : 0;
+    }
+
+    function fotoEkle(dosya) {
+      var m = { id: 'm' + (++sira), tur: 'foto', durum: 'hazirlaniyor', yuzde: 0, once: dosya.size };
+      medya.push(m);
+      medyaCiz();
+      fotoIsle(m, dosya);
+    }
+    function fotoIsle(m, dosya) {
+      m.durum = 'hazirlaniyor'; m.yuzde = 0; medyaGuncelle(m);
+      E.fotoHazirla(dosya).then(function (r) {
+        if (medya.indexOf(m) < 0) return;
+        m.sonra = r.blob.size; m.g = r.g; m.y = r.y;
+        if (!m.onizleme) { m.onizleme = URL.createObjectURL(r.blob); medyaCiz(); }
+        m.yol = E.yeniYol('foto', 'jpg');
+        m.durum = 'yukleniyor'; medyaGuncelle(m);
+        m.yukleme = E.yukle(r.blob, m.yol, 'image/jpeg', function (y) { m.yuzde = y; medyaGuncelle(m); });
+        return m.yukleme;
+      }).then(function () {
+        if (medya.indexOf(m) < 0) return;
+        m.durum = 'tamam'; medyaGuncelle(m);
+      }).catch(function (h) {
+        if (medya.indexOf(m) < 0 || (h && h.message === 'iptal')) return;
+        m.durum = 'hata'; m.mesaj = E.hataMetni(h); m.dosya = dosya; m.yol = null; medyaGuncelle(m);
+        E.tost(m.mesaj, 'kotu');
+      });
+    }
+    function videoEkle() {
+      var m = { id: 'v' + Date.now().toString(36), tur: 'video', durum: 'seciliyor', yuzde: 0 };
+      E.videoBaslat(m.id, function (o) {
+        if (o.durum === 'iptal') { E.videoIptal(m.id); return; }
+        if (o.durum === 'hata' && medya.indexOf(m) < 0) { E.videoIptal(m.id); E.tost(o.mesaj || 'Video eklenemedi.', 'kotu'); return; }
+        if (o.durum === 'secildi') {
+          m.sure = o.sure; m.g = o.g; m.y = o.y; m.once = o.boyut; m.onizleme = o.kapak; m.durum = 'sikistiriliyor';
+          if (medya.indexOf(m) < 0) medya.push(m);
+          medyaCiz();
+          return;
+        }
+        if (medya.indexOf(m) < 0) return;
+        if (o.durum === 'sikistiriliyor') { m.durum = 'sikistiriliyor'; m.yuzde = o.yuzde || 0; }
+        else if (o.durum === 'sikistirildi') { m.sonra = o.boyut; m.durum = 'yukleniyor'; m.yuzde = 0; }
+        else if (o.durum === 'yukleniyor') { m.durum = 'yukleniyor'; m.yuzde = o.yuzde || 0; }
+        else if (o.durum === 'tamam') { m.durum = 'tamam'; m.yol = o.yol; m.kapak = o.kapak_yol; E.videoIptal(m.id); }
+        else if (o.durum === 'hata') { m.durum = 'hata'; m.mesaj = o.mesaj; E.videoIptal(m.id); E.tost(o.mesaj || 'Video yüklenemedi.', 'kotu'); }
+        medyaGuncelle(m);
+      }).catch(function (h) { E.tost(E.hataMetni(h), 'kotu'); });
+    }
+
+    oz.onclick = function (o) {
+      var s = o.target.closest('[data-sil]');
+      if (s) {
+        var m = medya.filter(function (x) { return x.id === s.getAttribute('data-sil'); })[0];
+        if (!m) return;
+        if (m.yukleme && m.yukleme.iptal) m.yukleme.iptal();
+        if (m.tur === 'video') E.videoIptal(m.id);
+        E.dosyaSil([m.yol, m.kapak]);
+        medya.splice(medya.indexOf(m), 1);
+        medyaCiz();
+        return;
+      }
+      var t = o.target.closest('[data-tekrar]');
+      if (t) {
+        var mt = medya.filter(function (x) { return x.id === t.getAttribute('data-tekrar'); })[0];
+        if (!mt) return;
+        if (mt.tur === 'foto' && mt.dosya) fotoIsle(mt, mt.dosya);
+        else { medya.splice(medya.indexOf(mt), 1); medyaCiz(); videoEkle(); }
+      }
+    };
+
     cipCiz();
+    durum();
     cip.onclick = function (o) { var b = o.target.closest('[data-kat]'); if (b) { kategori = b.getAttribute('data-kat'); cipCiz(); } };
     alan.oninput = durum;
     E.$('.araclar', n).onclick = function (o) {
       var b = o.target.closest('[data-a]');
-      if (!b) return;
-      if (b.getAttribute('data-a') === 'liste') {
+      if (!b || b.disabled) return;
+      var a = b.getAttribute('data-a');
+      if (a === 'liste') {
         var v = alan.value;
         alan.value = v + (v && !/\n$/.test(v) ? '\n' : '') + '• ';
         alan.focus(); durum();
-        return;
+      } else if (a === 'foto') {
+        E.dosyalarSec('image/*', true).then(function (l) {
+          var bos = E.FOTO_EN - medya.length;
+          if (l.length > bos) E.tost('Bir kelama en fazla ' + E.FOTO_EN + ' fotoğraf eklenebilir.', 'kotu');
+          l.slice(0, Math.max(0, bos)).forEach(fotoEkle);
+        });
+      } else if (a === 'video') {
+        videoEkle();
       }
-      E.dosyaSec().then(function (d) {
-        if (!d) return;
-        gorsel = d;
-        oz.innerHTML = '<div class="onizleme"><img alt=""><button aria-label="Görseli kaldır">' + ikon('close') + '</button></div>';
-        E.$('img', oz).src = URL.createObjectURL(d);
-        E.$('button', oz).onclick = function () { gorsel = null; oz.innerHTML = ''; };
-      });
     };
+
+    // ---- Neşret: nakşediliyor ekranı ----
     gonder.onclick = function () {
       if (mesgul) return;
       mesgul = true; durum();
       var muhurler = muhur.value.split(/[,\s]+/).map(function (m) { return m.replace(/^#/, '').trim(); }).filter(Boolean).slice(0, 5);
-      var yukle = gorsel ? (E.tost('Görsel işleniyor...'), E.gorselYukle(gorsel, 'kelam', 1280)) : Promise.resolve(null);
-      yukle.then(function (yol) {
-        return E.rpc('kelam_nakset', { p_icerik: alan.value.trim(), p_kategori: kategori, p_muhurler: muhurler, p_gorsel: yol, p_ust: null });
-      }).then(function (k) {
-        E.katmanKapat();
-        E.tost('Kelamın meclise nakşedildi.', 'iyi');
-        E.tumSayfalariKapat();
-        if (E.ekran === 'sura' && E._suraListe && E.$('#sura-liste')) { E._suraListe.basaEkle(k); E.$('#govde').scrollTop = 0; }
-        else E.git('sura');
-      }).catch(function (h) { mesgul = false; durum(); E.tost(E.hataMetni(h), 'kotu'); });
+      var fotolar = medya.filter(function (m) { return m.tur === 'foto'; }), video = medya.filter(function (m) { return m.tur === 'video'; })[0];
+      var ek = document.createElement('div');
+      ek.className = 'naks';
+      n.appendChild(ek);
+      var adimlar = [];
+      if (fotolar.length) adimlar.push('foto');
+      if (video) adimlar.push('video');
+      if (medya.length) adimlar.push('yukle');
+      adimlar.push('muhur');
+      ek.innerHTML = '<div class="naks-halka" style="--p:0%">' + ikon('star-crescent') + '</div><h3>Kelamın nakşediliyor</h3>' +
+        '<div class="naks-adim">' + adimlar.map(function (a) { return '<div data-adim="' + a + '"></div>'; }).join('') + '</div><div class="naks-alt"></div>';
+      var halkaEl = E.$('.naks-halka', ek), basamak = 0;
+      function adim(ad, hal, metin) {
+        var el = E.$('[data-adim="' + ad + '"]', ek);
+        if (!el) return;
+        el.className = hal;
+        el.innerHTML = ikon(hal === 't' ? 'check-circle' : hal === 'su' ? 'rotate-right' : ad === 'muhur' ? 'stamper' : 'clock-outline') + '<span>' + esc(metin) + '</span>';
+      }
+      function ciz() {
+        var tamamlanan = medya.length ? medya.reduce(function (s, m) { return s + genel(m); }, 0) / medya.length : 100;
+        if (fotolar.length) {
+          var hazir = fotolar.every(function (m) { return m.sonra; });
+          adim('foto', hazir ? 't' : 'su', hazir ? 'Görseller küçültüldü (' + E.boyutYaz(toplam(fotolar, 'once')) + ' → ' + E.boyutYaz(toplam(fotolar, 'sonra')) + ')' : 'Görseller küçültülüyor');
+        }
+        if (video) {
+          adim('video', video.sonra ? 't' : 'su', video.sonra ? 'Video sıkıştırıldı (' + E.boyutYaz(video.once) + ' → ' + E.boyutYaz(video.sonra) + ')' : 'Video sıkıştırılıyor %' + (video.yuzde || 0));
+        }
+        if (medya.length) adim('yukle', tamamlanan >= 100 ? 't' : 'su', tamamlanan >= 100 ? 'Yüklendi' : 'Yükleniyor %' + Math.round(tamamlanan));
+        if (basamak === 0) adim('muhur', '', 'Mühür basılacak');
+        halkaEl.style.setProperty('--p', Math.round((medya.length ? tamamlanan * 0.85 : 40)) + '%');
+        return tamamlanan;
+      }
+      function vazgec(mesaj) {
+        clearInterval(dongu);
+        E.$('.naks-alt', ek).innerHTML = '<p>' + esc(mesaj) + '</p><button class="cerceve">Düzenlemeye dön</button>';
+        E.$('.naks-alt button', ek).onclick = function () { ek.parentNode.removeChild(ek); mesgul = false; durum(); };
+      }
+      var dongu = setInterval(function () {
+        if (medya.some(function (m) { return m.durum === 'hata'; })) { vazgec('Bir dosya yüklenemedi. Düzenlemeye dönüp tekrar dene ya da kaldır.'); return; }
+        if (ciz() < 100 || basamak) return;
+        basamak = 1;
+        clearInterval(dongu);
+        adim('muhur', 'su', 'Mühür basılıyor');
+        E.rpc('kelam_nakset', {
+          p_icerik: alan.value.trim(), p_kategori: kategori, p_muhurler: muhurler, p_gorsel: null, p_ust: null,
+          p_medya: medya.map(function (m) { return { tur: m.tur, yol: m.yol, kapak: m.kapak || null, g: m.g || null, y: m.y || null, sure: m.sure || null }; })
+        }).then(function (k) {
+          naksedildi = true;
+          adim('muhur', 't', 'Mühür basıldı');
+          halkaEl.style.setProperty('--p', '100%');
+          halkaEl.classList.add('bas');
+          E.$('h3', ek).textContent = 'Kelamın nakşedildi';
+          try { if (window.Android && Android.titret) Android.titret(25); } catch (e) { /* köprü yok */ }
+          setTimeout(function () {
+            E.katmanKapat();
+            E.tumSayfalariKapat();
+            if (E.ekran === 'sura' && E._suraListe && E.$('#sura-liste')) { E._suraListe.basaEkle(k); E.$('#govde').scrollTop = 0; }
+            else E.git('sura');
+          }, 950);
+        }).catch(function (h) { vazgec(E.hataMetni(h)); });
+      }, 150);
+      ciz();
     };
     setTimeout(function () { alan.focus(); }, 150);
   };

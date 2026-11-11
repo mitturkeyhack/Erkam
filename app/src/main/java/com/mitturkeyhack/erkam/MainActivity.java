@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
     static final String KOK = "https://" + ALAN + "/";
     static final String HATA_DOSYASI = "son_hata.txt";
     static final int DOSYA_ISTEGI = 41;
+    static final int VIDEO_ISTEGI = 42;
     static final int KOYU = 0xFF0F172A;
     static final int ACIK = 0xFFF1F5F9;
 
@@ -63,6 +64,8 @@ public class MainActivity extends Activity {
     private FrameLayout kok;
     private boolean sayfaHazir = false;
     private ValueCallback<Uri[]> dosyaGeri;
+    private String videoAyar;
+    private VideoIsleyici video;
 
     // ---------- çökme yakalayıcı: hata olursa bir sonraki açılışta ekranda gösterilir ----------
     private void cokmeYakalayiciKur() {
@@ -227,10 +230,14 @@ public class MainActivity extends Activity {
                 if (dosyaGeri != null) dosyaGeri.onReceiveValue(null);
                 dosyaGeri = geri;
                 try {
+                    String tur = "image/*";
+                    String[] turler = p != null ? p.getAcceptTypes() : null;
+                    if (turler != null && turler.length > 0 && turler[0] != null && turler[0].startsWith("video")) tur = "video/*";
                     Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                     i.addCategory(Intent.CATEGORY_OPENABLE);
-                    i.setType("image/*");
-                    startActivityForResult(Intent.createChooser(i, "Görsel seç"), DOSYA_ISTEGI);
+                    i.setType(tur);
+                    if (p != null && p.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE) i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    startActivityForResult(Intent.createChooser(i, tur.startsWith("video") ? "Video seç" : "Fotoğraf seç"), DOSYA_ISTEGI);
                 } catch (ActivityNotFoundException e) {
                     dosyaGeri = null;
                     geri.onReceiveValue(null);
@@ -270,13 +277,49 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int istek, int sonuc, Intent veri) {
         super.onActivityResult(istek, sonuc, veri);
+        if (istek == VIDEO_ISTEGI) { videoSecildi(sonuc == RESULT_OK && veri != null ? veri.getData() : null); return; }
         if (istek != DOSYA_ISTEGI) return;
         ValueCallback<Uri[]> geri = dosyaGeri;
         dosyaGeri = null;
         if (geri == null) return;
         Uri[] secilen = null;
-        if (sonuc == RESULT_OK && veri != null && veri.getData() != null) secilen = new Uri[]{veri.getData()};
+        if (sonuc == RESULT_OK && veri != null) {
+            if (veri.getClipData() != null && veri.getClipData().getItemCount() > 0) {
+                int n = veri.getClipData().getItemCount();
+                secilen = new Uri[n];
+                for (int k = 0; k < n; k++) secilen[k] = veri.getClipData().getItemAt(k).getUri();
+            } else if (veri.getData() != null) {
+                secilen = new Uri[]{veri.getData()};
+            }
+        }
         geri.onReceiveValue(secilen);
+    }
+
+    // ---------- video ----------
+    private void videoBildir(org.json.JSONObject o) {
+        final String js = "window.E_video&&window.E_video(" + o.toString() + ")";
+        runOnUiThread(() -> { if (web != null) web.evaluateJavascript(js, null); });
+    }
+
+    private void videoSecildi(Uri uri) {
+        String ayar = videoAyar;
+        videoAyar = null;
+        if (ayar == null) return;
+        try {
+            if (uri == null) {
+                org.json.JSONObject a = new org.json.JSONObject(ayar);
+                org.json.JSONObject o = new org.json.JSONObject();
+                o.put("id", a.optString("id"));
+                o.put("durum", "iptal");
+                videoBildir(o);
+                return;
+            }
+            if (video != null) video.iptalEt();
+            video = new VideoIsleyici(this, uri, ayar, this::videoBildir);
+            video.basla();
+        } catch (Throwable e) {
+            hatayiKaydet("Video başlatılamadı", e);
+        }
     }
 
     private void geriTusu() {
@@ -314,6 +357,28 @@ public class MainActivity extends Activity {
     public class Kopru {
         private final Context ctx;
         Kopru(Context c) { ctx = c.getApplicationContext(); }
+
+        @JavascriptInterface
+        public void videoSec(final String ayarJson) {
+            runOnUiThread(() -> {
+                try {
+                    videoAyar = ayarJson;
+                    Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                    i.addCategory(Intent.CATEGORY_OPENABLE);
+                    i.setType("video/*");
+                    startActivityForResult(Intent.createChooser(i, "Video seç"), VIDEO_ISTEGI);
+                } catch (Throwable e) {
+                    videoSecildi(null);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void videoIptal(final String id) {
+            runOnUiThread(() -> {
+                if (video != null && video.kimlik().equals(id)) { video.iptalEt(); video = null; }
+            });
+        }
 
         @JavascriptInterface
         public String surum() {

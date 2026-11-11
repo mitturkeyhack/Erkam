@@ -91,7 +91,21 @@ jobs:
           echo "IMZA_SIFRE=$IMZA_SIFRE" >> "$GITHUB_ENV"
 
       - name: APK derle
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee derleme.log
+
+      - name: Derleme hatasını kaydet
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/dh && cd /tmp/dh
+          grep -n -E "error:|ERROR|FAILURE|What went wrong|e: " "$GITHUB_WORKSPACE/derleme.log" | head -80 > ozet.txt || true
+          tail -n 200 "$GITHUB_WORKSPACE/derleme.log" > son.txt || true
+          git init -q && git checkout -q -b ci-derleme && git add -A
+          git -c user.name="erkam-ci" -c user.email="ci@erkam.invalid" commit -q -m "Derleme hatası #${GITHUB_RUN_NUMBER}"
+          git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ci-derleme
 
       - name: APK'yı adlandır
         run: cp app/build/outputs/apk/release/app-release.apk Erkam.apk

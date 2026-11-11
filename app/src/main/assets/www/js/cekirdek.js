@@ -88,7 +88,9 @@
     yetki_yok: 'Bu kelamı görme yetkin yok.',
     yoldas_yok: 'Yoldaş bulunamadı.',
     kendin: 'Bunu kendine yapamazsın.',
-    yol_gecersiz: 'Görsel yüklenemedi.'
+    yol_gecersiz: 'Görsel yüklenemedi.',
+    bos_kelam: 'Bir şey yaz ya da bir fotoğraf ekle.',
+    medya_gecersiz: 'Bir kelamda en fazla 4 fotoğraf ya da 1 video olabilir.'
   };
   E.hataMetni = function (h) {
     var m = (h && (h.message || h.error_description || h.msg)) || String(h || '');
