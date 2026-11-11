@@ -310,6 +310,7 @@
       if (E.tercih('biyometrik') === '1') kilitle();
       E.bildirimKur();
       setTimeout(window.E_bildirimAc, 300);
+      setTimeout(function () { if (E.guncellemeDenetle) E.guncellemeDenetle(false); }, 2500);
     }).catch(function (h) {
       E.$('#acilis').hidden = true;
       if (/giris_gerekli|JWT|token|401/i.test(String(h && h.message))) { E.cikisYap(); return; }

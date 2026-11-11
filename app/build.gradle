@@ -22,6 +22,7 @@ android {
         release {
             storeFile file(System.getenv("IMZA_DOSYA") ?: "imza.jks")
             storePassword System.getenv("IMZA_SIFRE") ?: ""
+            storeType((System.getenv("IMZA_DOSYA") ?: "").endsWith(".p12") ? "pkcs12" : "jks")
             keyAlias "erkam"
             keyPassword System.getenv("IMZA_SIFRE") ?: ""
         }

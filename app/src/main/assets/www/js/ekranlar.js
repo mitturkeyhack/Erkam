@@ -400,6 +400,7 @@
       '<button class="satir duz" data-is="sifre-guncelle">' + ikon('key-chain') + '<span class="orta"><b>Şifre Güncelle</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz kirmizi" data-is="cikis">' + ikon('logout') + '<span class="orta"><b>Meclisten Ayrıl (Çıkış Yap)</b></span></button></div>' +
       '<div class="grup"><button class="satir duz kirmizi" data-is="hesap-sil">' + ikon('account-remove') + '<span class="orta"><b>Hesabımı Kalıcı Olarak Sil</b></span></button></div>' +
+      '<div class="grup"><button class="satir duz" data-is="guncelleme-denetle">' + ikon('cellphone-arrow-down') + '<span class="orta"><b>Güncellemeleri Denetle</b><span>Şu an: ERKAM v' + esc(surum) + '</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="surum">ERKAM v' + esc(surum) + '</div>';
   };
   E.is['ayar-fecr'] = function () {

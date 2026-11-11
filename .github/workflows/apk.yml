@@ -82,13 +82,31 @@ jobs:
           git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ci-rapor
 
       - name: İmza anahtarı hazırla
+        env:
+          IMZA_ANAHTARI: ${{ secrets.IMZA_ANAHTARI }}
         run: |
-          IMZA_SIFRE="$(openssl rand -hex 16)"
-          echo "::add-mask::$IMZA_SIFRE"
-          keytool -genkeypair -keystore "$RUNNER_TEMP/imza.jks" -storetype JKS -storepass "$IMZA_SIFRE" -keypass "$IMZA_SIFRE" \
-            -alias erkam -keyalg RSA -keysize 2048 -validity 10950 -dname "CN=Erkam, O=mitturkeyhack, C=TR"
-          echo "IMZA_DOSYA=$RUNNER_TEMP/imza.jks" >> "$GITHUB_ENV"
+          if [ -n "$IMZA_ANAHTARI" ]; then
+            # kalıcı anahtar: 1. satır parola, 2. satır PKCS12 dosyasının base64 hali
+            IMZA_SIFRE="$(printf '%s\n' "$IMZA_ANAHTARI" | sed -n 1p | tr -d '\r ')"
+            echo "::add-mask::$IMZA_SIFRE"
+            printf '%s\n' "$IMZA_ANAHTARI" | sed -n '2,$p' | tr -d '\r\n ' | base64 -d > "$RUNNER_TEMP/imza.p12"
+            echo "Kalıcı imza anahtarı kullanılıyor."
+            echo "IMZA_DOSYA=$RUNNER_TEMP/imza.p12" >> "$GITHUB_ENV"
+          else
+            IMZA_SIFRE="$(openssl rand -hex 16)"
+            echo "::add-mask::$IMZA_SIFRE"
+            keytool -genkeypair -keystore "$RUNNER_TEMP/imza.jks" -storetype JKS -storepass "$IMZA_SIFRE" -keypass "$IMZA_SIFRE" \
+              -alias erkam -keyalg RSA -keysize 2048 -validity 10950 -dname "CN=Erkam, O=mitturkeyhack, C=TR"
+            echo "::warning::IMZA_ANAHTARI sırrı yok; geçici anahtar kullanıldı."
+            echo "IMZA_DOSYA=$RUNNER_TEMP/imza.jks" >> "$GITHUB_ENV"
+          fi
           echo "IMZA_SIFRE=$IMZA_SIFRE" >> "$GITHUB_ENV"
+
+      - name: Sürüm notu hazırla
+        run: |
+          git log -1 --pretty=%B | grep -v -E '^(Co-Authored-By|Claude-Session):' | sed '/^[[:space:]]*$/d' > notlar.txt
+          echo "---" >> notlar.txt
+          echo "Telefona indir: Erkam.apk dosyasına dokun." >> notlar.txt
 
       - name: APK derle
         run: |
@@ -115,7 +133,6 @@ jobs:
         with:
           tag_name: v0.1.${{ github.run_number }}
           name: ERKAM v0.1.${{ github.run_number }}
-          body: |
-            Telefona indir: Erkam.apk dosyasına dokun.
+          body_path: notlar.txt
           files: Erkam.apk
           make_latest: true

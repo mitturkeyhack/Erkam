@@ -345,6 +345,82 @@ public class MainActivity extends Activity {
         }
     }
 
+    // ---------- güncelleme indirme ----------
+    private volatile boolean guncellemeIptal = false;
+    private File guncellemeDosyasi() {
+        File kl = new File(getCacheDir(), "secim");
+        if (!kl.exists()) kl.mkdirs();
+        return new File(kl, "erkam-guncelleme.apk");
+    }
+    private void guncellemeBildir(String tur, int yuzde, String hata) {
+        try {
+            org.json.JSONObject o = new org.json.JSONObject();
+            o.put("tur", tur); o.put("yuzde", yuzde);
+            if (hata != null) o.put("hata", hata);
+            final String js = "window.E_guncelleme&&window.E_guncelleme(" + o + ")";
+            runOnUiThread(() -> { if (web != null) web.evaluateJavascript(js, null); });
+        } catch (Exception e) { /* yok */ }
+    }
+    private void guncellemeyiIndir(String adres) {
+        guncellemeIptal = false;
+        File hedef = guncellemeDosyasi(), gecici = new File(hedef.getPath() + ".part");
+        try {
+            java.net.URL url = new java.net.URL(adres);
+            java.net.HttpURLConnection h = null;
+            for (int i = 0; i < 6; i++) {           // github → objects.githubusercontent.com yönlendirmesi
+                h = (java.net.HttpURLConnection) url.openConnection();
+                h.setInstanceFollowRedirects(false);
+                h.setConnectTimeout(15000); h.setReadTimeout(20000);
+                int kod = h.getResponseCode();
+                if (kod >= 300 && kod < 400) { url = new java.net.URL(url, h.getHeaderField("Location")); h.disconnect(); continue; }
+                if (kod != 200) throw new java.io.IOException("Sunucu " + kod + " döndü");
+                break;
+            }
+            long boy = h.getContentLengthLong(), alinan = 0;
+            int son = -1;
+            try (java.io.InputStream in = h.getInputStream(); java.io.FileOutputStream out = new java.io.FileOutputStream(gecici)) {
+                byte[] tampon = new byte[64 * 1024];
+                int n;
+                while ((n = in.read(tampon)) > 0) {
+                    if (guncellemeIptal) throw new java.io.IOException("iptal");
+                    out.write(tampon, 0, n);
+                    alinan += n;
+                    int y = boy > 0 ? (int) (alinan * 100 / boy) : -1;
+                    if (y != son) { son = y; guncellemeBildir("ilerleme", y, null); }
+                }
+            }
+            if (hedef.exists()) hedef.delete();
+            if (!gecici.renameTo(hedef)) throw new java.io.IOException("Dosya kaydedilemedi");
+            guncellemeBildir("indi", 100, null);
+            runOnUiThread(this::guncellemeyiKur);
+        } catch (Throwable e) {
+            gecici.delete();
+            guncellemeBildir("hata", 0, "iptal".equals(e.getMessage()) ? "iptal" : String.valueOf(e.getMessage()));
+        }
+    }
+    private void guncellemeyiKur() {
+        File f = guncellemeDosyasi();
+        if (!f.exists()) { guncellemeBildir("hata", 0, "Dosya bulunamadı"); return; }
+        if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+            guncellemeBildir("izin", 100, null);
+            try {
+                startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:" + getPackageName())));
+            } catch (Throwable e) { /* ayar açılamadı */ }
+            return;
+        }
+        try {
+            Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".dosya", f);
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(uri, "application/vnd.android.package-archive");
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            guncellemeBildir("kurulum", 100, null);
+        } catch (Throwable e) {
+            guncellemeBildir("hata", 0, String.valueOf(e.getMessage()));
+        }
+    }
+
     // ---------- bildirime dokununca ----------
     private void hedefAl(Intent i) {
         if (i == null) return;
@@ -453,6 +529,18 @@ public class MainActivity extends Activity {
                 if (video != null && video.kimlik().equals(id)) { video.iptalEt(); video = null; }
             });
         }
+
+        // ---------- uygulama içi güncelleme ----------
+        @JavascriptInterface
+        public void guncellemeIndir(String adres) {
+            new Thread(() -> guncellemeyiIndir(adres)).start();
+        }
+
+        @JavascriptInterface
+        public void guncellemeKur() { runOnUiThread(() -> guncellemeyiKur()); }
+
+        @JavascriptInterface
+        public void guncellemeIptal() { guncellemeIptal = true; }
 
         @JavascriptInterface
         public void bildirimBaslat(String ayar) {

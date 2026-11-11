@@ -726,3 +726,48 @@ html[data-tema="acik"] .anahtar.acik { background: var(--vurgu); border-color: v
 .rv-o small { display: block; font-size: 12.5px; color: var(--soluk); }
 .rv-o b { display: block; font-size: 17px; font-weight: 800; margin: 2px 0; color: var(--yazi); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rv-satir > svg { width: 22px; height: 22px; color: var(--soluk2); flex: none; }
+
+/* ---------- Güncelleme penceresi ---------- */
+.gnc { position: absolute; left: 14px; right: 14px; top: 50%; transform: translateY(-50%); z-index: 31; max-width: 430px; margin: 0 auto;
+  background: var(--kart); border-radius: 30px; overflow: hidden; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4); animation: gnGel 0.35s cubic-bezier(.2,1.2,.3,1); }
+@keyframes gnGel { from { opacity: 0; transform: translateY(-44%) scale(0.92); } to { opacity: 1; transform: translateY(-50%) scale(1); } }
+.gn-ust { position: relative; padding: 30px 20px 22px; text-align: center; color: #fff; overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 0%, #10b981 0%, #047857 55%, #064e3b 100%); }
+.gn-isik { position: absolute; inset: -40% -20% auto; height: 160%; background: conic-gradient(from 0deg, transparent, rgba(255,255,255,.14), transparent 30%);
+  animation: gnDon 6s linear infinite; pointer-events: none; }
+@keyframes gnDon { to { transform: rotate(360deg); } }
+.gn-simge { position: relative; width: 92px; height: 92px; margin: 0 auto 14px; border-radius: 30px; background: rgba(255,255,255,.16);
+  display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); backdrop-filter: blur(6px); }
+.gn-simge > svg { width: 52px; height: 52px; }
+.gn-halka { position: absolute; inset: -8px; border-radius: 36px; border: 2px solid rgba(255,255,255,.35); animation: gnNabiz 2s ease-out infinite; }
+@keyframes gnNabiz { from { transform: scale(0.9); opacity: 1; } to { transform: scale(1.25); opacity: 0; } }
+.gn-ok { position: absolute; right: -6px; bottom: -6px; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: #059669;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(0,0,0,.25); animation: gnZipla 1.6s ease-in-out infinite; }
+.gn-ok svg { width: 20px; height: 20px; }
+@keyframes gnZipla { 50% { transform: translateY(-4px); } }
+.gn-ust b { position: relative; display: block; font-size: 23px; font-weight: 900; letter-spacing: .2px; }
+.gn-surum { position: relative; display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 6px 8px; border-radius: 14px;
+  background: rgba(0,0,0,.18); font-size: 13.5px; font-weight: 800; }
+.gn-surum span { padding: 3px 8px; border-radius: 9px; opacity: .8; }
+.gn-surum span.yeni { background: #fff; color: #047857; opacity: 1; }
+.gn-surum svg { width: 16px; height: 16px; opacity: .8; }
+.gn-ic { padding: 20px 20px 18px; }
+.gn-baslik { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 900; color: var(--yazi); }
+.gn-baslik svg { width: 20px; height: 20px; color: var(--vurgu); }
+.gn-baslik small { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--soluk); background: var(--zemin); padding: 3px 9px; border-radius: 9px; }
+.gn-not { list-style: none; margin: 12px 0 0; padding: 0; max-height: 170px; overflow: auto; }
+.gn-not li { position: relative; padding: 7px 0 7px 26px; font-size: 14.5px; line-height: 1.45; color: var(--yazi2); }
+.gn-not li::before { content: ""; position: absolute; left: 4px; top: 12px; width: 12px; height: 12px; border-radius: 4px; transform: rotate(45deg);
+  background: linear-gradient(135deg, #10b981, #047857); }
+.gn-guven { display: flex; align-items: center; gap: 8px; margin: 14px 0 16px; padding: 10px 12px; border-radius: 14px; background: var(--vurgu-zemin);
+  color: var(--vurgu); font-size: 13px; font-weight: 700; }
+.gn-guven svg { width: 18px; height: 18px; flex: none; }
+.gnc.izin .gn-guven { background: #fef3c7; color: #92400e; }
+.gn-dgm { position: relative; width: 100%; height: 56px; border-radius: 18px; overflow: hidden; background: var(--vurgu); color: #fff;
+  font-size: 16px; font-weight: 900; box-shadow: 0 10px 24px rgba(5,150,105,.35); }
+.gn-dolu { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, rgba(255,255,255,.12), rgba(255,255,255,.3));
+  transition: width .3s ease; }
+.gn-yazi { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.gn-yazi svg { width: 22px; height: 22px; }
+.gn-cark { width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff; animation: don .8s linear infinite; }
+.gn-sonra { display: block; width: 100%; margin-top: 10px; padding: 10px; font-size: 14.5px; font-weight: 700; color: var(--soluk); }
