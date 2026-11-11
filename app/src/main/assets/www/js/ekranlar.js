@@ -27,7 +27,7 @@
     h += E.medyaHtml(k);
     if ((o.muhurlu || o.acik) && k.muhurler && k.muhurler.length) {
       h += '<div class="muhurler">' + k.muhurler.map(function (m) {
-        return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m) + '">' + ikon('stamper') + esc(m) + '</button>';
+        return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m) + '">' + ikon('pound') + esc(m) + '</button>';
       }).join('') + '</div>';
     }
     if (o.acik) h += '<div class="zaman">' + esc(E.once(k.olusturma)) + '</div>';

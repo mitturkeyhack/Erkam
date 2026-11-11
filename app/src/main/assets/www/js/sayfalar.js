@@ -314,7 +314,7 @@
             }
             if (d.muhurler && d.muhurler.length) {
               h += '<div class="ara-bolum">MÜHÜRLER</div><div class="muhur-liste">' + d.muhurler.map(function (m) {
-                return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m.muhur) + '">' + ikon('stamper') + esc(m.muhur) + ' · ' + m.sayi + '</button>';
+                return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m.muhur) + '">' + ikon('pound') + esc(m.muhur) + ' · ' + m.sayi + '</button>';
               }).join('') + '</div>';
             }
             if (d.kelamlar && d.kelamlar.length) {
@@ -332,7 +332,7 @@
   E.muhurSayfa = function (muhur) {
     E.sayfaAc({
       ad: 'muhur',
-      html: E.sayfaBasligi('<div class="ad">' + ikon('stamper') + esc(muhur) + '</div>') + '<div class="ic"><div style="height:20px"></div><div class="ml"></div></div>',
+      html: E.sayfaBasligi('<div class="ad">' + ikon('pound') + esc(muhur) + '</div>') + '<div class="ic"><div style="height:20px"></div><div class="ml"></div></div>',
       kur: function (el) {
         E.kelamListe(E.$('.ml', el), { kaynak: 'muhur', metin: muhur }, { bos: 'Bu mühürle nakşedilmiş kelam yok.', kart: { muhurlu: true } });
       }
@@ -626,7 +626,7 @@
         var el = E.$('[data-adim="' + ad + '"]', ek);
         if (!el) return;
         el.className = hal;
-        el.innerHTML = ikon(hal === 't' ? 'check-circle' : hal === 'su' ? 'rotate-right' : ad === 'muhur' ? 'stamper' : 'clock-outline') + '<span>' + esc(metin) + '</span>';
+        el.innerHTML = ikon(hal === 't' ? 'check-circle' : hal === 'su' ? 'rotate-right' : ad === 'muhur' ? 'pound' : 'clock-outline') + '<span>' + esc(metin) + '</span>';
       }
       function ciz() {
         var tamamlanan = medya.length ? medya.reduce(function (s, m) { return s + genel(m); }, 0) / medya.length : 100;
