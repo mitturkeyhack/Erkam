@@ -241,16 +241,15 @@
   // ---------- Mesajlar ----------
   EKRAN.mesajlar = function (g) {
     g.innerHTML = '<div class="serit">' + ikon('shield-lock') + '<span>Kelamlarınız Dar-ul Erkam\'ın manevi emanetinde, mahremdir.</span></div>' +
-      '<label class="ara-kutu">' + ikon('magnify') + '<input id="mesaj-ara" placeholder="Kelam veya yoldaş ara..." autocomplete="off"></label>' +
+      '<label class="ara-kutu">' + ikon('magnify') + '<input id="mesaj-ara" placeholder="Sohbet veya yoldaş ara..." autocomplete="off"></label>' +
       '<div class="cipler" id="mesaj-cip"></div><div id="mesaj-liste"><div class="yukleniyor"><div class="cark"></div></div></div>';
     E.$('#yuzen-kok').innerHTML = '<button class="yuzen" data-is="yeni-mesaj" aria-label="Yeni mesaj">' + ikon('message-plus') + '</button>';
     function ciz() {
       var c = E.veri.mesajCip, q = (E.$('#mesaj-ara').value || '').toLocaleLowerCase('tr');
-      E.$('#mesaj-cip').innerHTML = [['tumu', 'Tümü'], ['okunmayan', 'Okunmayanlar'], ['meclis', 'Meclis']].map(function (x) {
+      E.$('#mesaj-cip').innerHTML = [['tumu', 'Tümü'], ['okunmayan', 'Okunmayanlar']].map(function (x) {
         return '<button class="cip' + (c === x[0] ? ' aktif' : '') + '" data-is="mesaj-cip" data-cip="' + x[0] + '">' + x[1] + '</button>';
       }).join('');
       var kap = E.$('#mesaj-liste');
-      if (c === 'meclis') { kap.innerHTML = '<div class="bos-not">' + ikon('account-group') + 'Meclis odaları bir sonraki sürümde açılacak.</div>'; return; }
       var d = (E.veri.sohbetler || []).filter(function (s) {
         if (c === 'okunmayan' && !(s.okunmamis > 0)) return false;
         if (!q) return true;
@@ -301,8 +300,8 @@
       h += '<div class="profil-dgm"><button class="' + d[0] + '" data-is="yoldas-edin" data-id="' + esc(p.id) + '">' + ikon(d[1]) + d[2] + '</button>' +
         '<button class="cerceve" data-is="mesaj-yaz" data-id="' + esc(p.id) + '">' + ikon('message-text-outline') + 'Mesaj</button></div>';
     }
-    h += '</div><div class="sayilar"><div><b>' + (p.takip_edilen_sayisi || 0) + '</b><span>Takip Edilen</span></div>' +
-      '<div><b>' + (p.yoldas_sayisi || 0) + '</b><span>Yoldaşlar</span></div></div>';
+    h += '</div><div class="sayilar"><div><b>' + (p.takip_edilen_sayisi || 0) + '</b><span>Yoldaş Edindiği</span></div>' +
+      '<div><b>' + (p.yoldas_sayisi || 0) + '</b><span>Yoldaşları</span></div></div>';
     return h;
   };
   E.profilSekmeleri = function (kap, p, benim, durum) {
@@ -311,7 +310,7 @@
       return '<button class="' + (s === x[0] ? 'aktif' : '') + '" data-psekme="' + x[0] + '">' + x[1] + '</button>';
     }).join('') + '</div><div class="pl"></div>';
     var arg = s === 'kelam' ? { kaynak: 'yazar', yazar: p.id } : s === 'cevap' ? { kaynak: 'cevap', yazar: p.id } : { kaynak: 'ara', metin: '@' + p.kunye };
-    var bos = s === 'kelam' ? (benim ? 'Henüz kelamın veya etiketin yok.' : 'Bu yoldaş henüz kelam nakşetmemiş.')
+    var bos = s === 'kelam' ? (benim ? 'Henüz kelam nakşetmedin.' : 'Bu yoldaş henüz kelam nakşetmemiş.')
       : s === 'cevap' ? 'Henüz verilmiş bir cevap yok.' : 'Henüz bu künyenin anıldığı bir istişare yok.';
     E.kelamListe(E.$('.pl', kap), arg, { bos: bos, kart: s === 'cevap' ? { zamanUstte: true } : null });
     E.$('.sekmeler', kap).onclick = function (o) {
@@ -381,7 +380,7 @@
         return '<div class="kart madde"><span class="ikon-kutu">' + ikon(x[0]) + '</span><div class="ic"><b>' + x[1] + '</b><span>' + esc(x[2]) + '</span></div></div>';
       }).join('') +
       '<p class="soz">"İlim, paylaşıldıkça çoğalır; ahlak, yaşatıldıkça yücelir."</p>' +
-      '<p class="imza">Afsu Diyaliz Team Ailesi olarak bu nizamın koruyucularıyız.</p>';
+      '<p class="imza">ERKAM Meclisi olarak bu nizamın koruyucularıyız.</p>';
   };
 
   // ---------- Gayemiz ----------
@@ -398,8 +397,7 @@
   // ---------- Nizam ----------
   function anahtar(acik) { return '<span class="anahtar' + (acik ? ' acik' : '') + '"><i>' + ikon('star-crescent') + '</i></span>'; }
   EKRAN.nizam = function (g) {
-    var b = E.ben, u = (E.oturum && E.oturum.user) || {};
-    var tasdikli = !!(u.email_confirmed_at || u.confirmed_at);
+    var b = E.ben;
     var surum = '0.1';
     try { if (window.Android && Android.surum) surum = Android.surum(); } catch (e) { /* köprü yok */ }
     g.innerHTML = '<div class="baslik">' + ikon('cog') + '<h2>Nizam</h2></div>' +
@@ -411,8 +409,6 @@
       '<button class="satir" data-is="ayar-bildirim"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Meclis Bildirimleri</b><span>Yeni kelam ve mesajları bildir</span></span>' + anahtar(E.tercih('bildirim') !== '0') + '</button></div>' +
       '<div class="bolum">HESAP YÖNETİMİ</div><div class="grup">' +
       '<button class="satir duz" data-is="cekmece-git" data-ekran="kunye">' + ikon('at') + '<span class="orta"><b>Künye (Kullanıcı Adı) Değiştir</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
-      '<button class="satir duz" data-is="eposta-tasdik">' + ikon('email-check-outline') + '<span class="orta"><b>E-Posta Tasdiki</b><span>' + esc(u.email || '') + '</span></span>' +
-      '<span class="etk ' + (tasdikli ? 'iyi' : 'kotu') + '">' + (tasdikli ? 'Onaylı' : 'Onaysız') + '</span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz" data-is="sifre-guncelle">' + ikon('key-chain') + '<span class="orta"><b>Şifre Güncelle</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz kirmizi" data-is="cikis">' + ikon('logout') + '<span class="orta"><b>Meclisten Ayrıl (Çıkış Yap)</b></span></button></div>' +
       '<div class="grup"><button class="satir duz kirmizi" data-is="hesap-sil">' + ikon('account-remove') + '<span class="orta"><b>Hesabımı Kalıcı Olarak Sil</b></span></button></div>' +
@@ -446,14 +442,6 @@
       E.tercih('biyometrik', '1');
       E.tost('Biyometrik güvenlik aktifleştirildi yoldaş.', 'iyi');
       if (E.ekran === 'nizam') E.kabukYenile(true);
-    });
-  };
-  E.is['eposta-tasdik'] = function () {
-    var u = (E.oturum && E.oturum.user) || {};
-    if (u.email_confirmed_at || u.confirmed_at) { E.tost('E-postan tasdikli.', 'iyi'); return; }
-    return E.sb.auth.resend({ type: 'signup', email: u.email }).then(function (r) {
-      if (r.error) throw r.error;
-      E.tost('Tasdik bağlantısı e-postana gönderildi.', 'iyi');
     });
   };
   E.is['sifre-guncelle'] = function () {
