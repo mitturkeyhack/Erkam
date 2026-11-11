@@ -25,7 +25,9 @@
     var h = '<div class="kart kelam' + (o.cevap ? ' cevap' : '') + '" data-kelam="' + k.id + '">' +
       '<div class="bas"><button class="kim" data-is="yoldas" data-kunye="' + esc(y.kunye) + '">' + E.avatar(y) +
       '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + (y.rol === 'yonetim' ? ikon('check-decagram') : '') + '</button>' +
-      '<span class="tur">' + esc(sagUst) + '</span></div>' +
+      (!o.zamanUstte && k.muhurler && k.muhurler[0]
+        ? '<button class="tur tur-muhur" data-is="muhur-ac" data-muhur="' + esc(k.muhurler[0]) + '">' + esc(sagUst) + '</button>'
+        : '<span class="tur">' + esc(sagUst) + '</span>') + '</div>' +
       '<div class="metin"' + (o.acik ? '' : ' data-is="kelam-ac" data-id="' + k.id + '"') + '>' + E.metinHtml(k.icerik) + '</div>';
     h += E.medyaHtml(k);
     if ((o.muhurlu || o.acik) && k.muhurler && k.muhurler.length) {
