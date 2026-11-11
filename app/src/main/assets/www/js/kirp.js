@@ -141,7 +141,6 @@
           E.ben = ben;
           if (eski) E.dosyaSil([eski]);
           E.katmanKapat();
-          E.tost(tur === 'avatar' ? 'Profil görselin mühürlendi.' : 'Kapak görselin mühürlendi.', 'iyi');
           E.kabukYenile(true);
         })
         .catch(function (h) {
@@ -188,7 +187,7 @@
           if (!evet) return;
           return E.rpc('profil_gorsel', { p_tur: tur, p_yol: null }).then(function (ben) {
             E.ben = ben; E.dosyaSil([var_]);
-            E.tost('Görsel kaldırıldı.', 'iyi'); E.kabukYenile(true);
+E.kabukYenile(true);
           });
         });
       }

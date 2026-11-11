@@ -58,6 +58,8 @@ function metinler(v: any): { baslik: string; govde: string; hedef: string; grup:
     case "yoldas": return { baslik: "Yeni yoldaş", govde: kim + " (@" + v.kunye + ") seni yoldaş edindi.", hedef: "profil:" + v.kunye, grup: "yoldas" };
     case "istek": return { baslik: "Yoldaşlık isteği", govde: kim + " (@" + v.kunye + ") yoldaşın olmak istiyor.", hedef: "profil:" + v.kunye, grup: "yoldas" };
     case "kabul": return { baslik: "İstek tasdiklendi", govde: kim + " (@" + v.kunye + ") yoldaşlık isteğini kabul etti.", hedef: "profil:" + v.kunye, grup: "yoldas" };
+    case "duyuru": return { baslik: "📣 ERKAM Duyurusu", govde: v.metin || "Meclisten yeni bir duyuru var.", hedef: "", grup: "duyuru" };
+    case "uyari": return { baslik: "Yönetimden bildirim", govde: v.metin || "Hesabınla ilgili bir gelişme var.", hedef: "", grup: "uyari" };
     default: return { baslik: "ERKAM", govde: "Mecliste yeni bir gelişme var.", hedef: "", grup: "genel" };
   }
 }

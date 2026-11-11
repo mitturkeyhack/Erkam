@@ -24,7 +24,7 @@
     var sagUst = o.zamanUstte ? E.once(k.olusturma) : (k.muhurler && k.muhurler[0] ? '#' + k.muhurler[0] : '');
     var h = '<div class="kart kelam' + (o.cevap ? ' cevap' : '') + '" data-kelam="' + k.id + '">' +
       '<div class="bas"><button class="kim" data-is="yoldas" data-kunye="' + esc(y.kunye) + '">' + E.avatar(y) +
-      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + (y.rol === 'yonetim' ? ikon('check-decagram') : '') + '</button>' +
+      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + (y.rol === 'yonetim' || y.onayli ? ikon('check-decagram') : '') + '</button>' +
       (!o.zamanUstte && k.muhurler && k.muhurler[0]
         ? '<button class="tur tur-muhur" data-is="muhur-ac" data-muhur="' + esc(k.muhurler[0]) + '">' + esc(sagUst) + '</button>'
         : '<span class="tur">' + esc(sagUst) + '</span>') + '</div>' +
@@ -122,7 +122,6 @@
         b.className = 'heybe' + (acik ? ' acik' : '');
         b.innerHTML = ikon(acik ? 'bag-personal' : 'bag-personal-outline');
       });
-      E.tost(acik ? 'Kelam heybene kondu.' : 'Kelam heybenden çıkarıldı.', 'iyi');
       if (!acik && E.ekran === 'heybe' && !E.yigin.length && E._heybeListe) E._heybeListe.cikar(id);
     });
   };
@@ -204,6 +203,8 @@
       [['profil', 'account-circle', 'Profil'], ['kunye', 'account-edit', 'Künye'], ['heybe', 'bag-personal', 'Heybe']].map(it).join('') +
       '<div class="cm-gb">ERKAM</div>' +
       [['adap', 'scale-balance', 'Adap ve Usul'], ['gayemiz', 'compass-rose', 'Gayemiz'], ['nizam', 'cog', 'Nizam']].map(it).join('') +
+      (b.rol === 'yonetim' ? '<div class="cm-gb">YÖNETİM</div><button class="cm-it cm-yon" data-is="yonetim-ac">' + ikon('shield-crown-outline') + 'Yönetim Merkezi' +
+        (b.bekleyen_sikayet ? '<span class="cm-rozet">' + b.bekleyen_sikayet + '</span>' : '') + '</button>' : '') +
       '</div><button class="cm-cik" data-is="cekmece-cikis">' + ikon('logout') + 'Meclisten Ayrıl</button></div>';
   };
   E.is['cekmece-cikis'] = function () { E.cekmeceKapat(); return E.is.cikis(); };
@@ -354,7 +355,6 @@
       p_isim: E.$('#k-isim').value, p_kunye: E.$('#k-kunye').value, p_biyografi: E.$('#k-bio').value
     }).then(function (b) {
       E.ben = b;
-      E.tost('Künyen mühürlendi.', 'iyi');
       E.git('profil');
     }, function (h) { el.disabled = false; throw h; });
   };
@@ -389,6 +389,7 @@
 
   // ---------- Nizam ----------
   function anahtar(acik) { return '<span class="anahtar' + (acik ? ' acik' : '') + '"><i>' + ikon('star-crescent') + '</i></span>'; }
+  E.$anahtar = anahtar;
   EKRAN.nizam = function (g) {
     var b = E.ben;
     var surum = '0.1';
@@ -416,7 +417,7 @@
   E.is['ayar-bildirim'] = function () {
     var ac = E.tercih('bildirim') === '0';
     E.tercih('bildirim', ac ? '1' : '0');
-    if (ac) { E.bildirimKur(); E.tost('Bildirimler açıldı.', 'iyi'); }
+    if (ac) { E.bildirimKur(); }
     else {
       if (E._fcm) E.rpc('cihaz_sil', { p_token: E._fcm }).catch(function () {});
       E._fcm = null;
@@ -428,7 +429,6 @@
     var yeni = !E.ben.izole;
     return E.rpc('izole_ayarla', { p_acik: yeni }).then(function (r) {
       E.ben.izole = !!r;
-      E.tost(r ? 'Kimliğin izole edildi. Kelamlarını yalnızca tasdikli yoldaşların görür.' : 'İzole kimlik kaldırıldı.', 'iyi');
       E.kabukYenile(true);
     });
   };
@@ -441,7 +441,6 @@
     E.biyometrikSor(function (tamam) {
       if (!tamam) return;
       E.tercih('biyometrik', '1');
-      E.tost('Biyometrik güvenlik aktifleştirildi yoldaş.', 'iyi');
       if (E.ekran === 'nizam') E.kabukYenile(true);
     });
   };
@@ -491,6 +490,7 @@
       if (!b) return false;
       var eski = JSON.stringify(E.ben);
       E.ben = b;
+      if (b.uzak && E.uzakEkrani) { E.uzakEkrani(); return false; }
       E.rozetCiz();
       return eski !== JSON.stringify(b);
     }).catch(function () { return false; });

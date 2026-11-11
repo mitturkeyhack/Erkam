@@ -92,7 +92,12 @@
     kendin: 'Bunu kendine yapamazsın.',
     yol_gecersiz: 'Görsel yüklenemedi.',
     bos_kelam: 'Bir şey yaz ya da bir fotoğraf ekle.',
-    medya_gecersiz: 'Bir kelamda en fazla 4 fotoğraf ya da 1 video olabilir.'
+    medya_gecersiz: 'Bir kelamda en fazla 4 fotoğraf ya da 1 video olabilir.',
+    susturuldun: 'Yönetim seni bir süreliğine susturdu; şu an kelam ve mesaj gönderemezsin.',
+    uzaklastirildin: 'Meclisten uzaklaştırıldın.',
+    duyuru_gecersiz: 'Duyuru 3-600 karakter olmalı.',
+    baslik_gecersiz: 'Başlık en az 2 karakter olmalı.',
+    islem_gecersiz: 'Bu işlem yapılamadı.'
   };
   E.hataMetni = function (h) {
     var m = (h && (h.message || h.error_description || h.msg)) || String(h || '');

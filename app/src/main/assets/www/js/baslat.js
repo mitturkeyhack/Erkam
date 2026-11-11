@@ -278,7 +278,7 @@
         sifreYenile = false; kodBilgi = null; girisModu = 'giris';
         return E.sb.auth.getSession().then(function (x) {
           var o = x && x.data && x.data.session;
-          if (o) { E.tost('Şifren yenilendi. Meclise hoş geldin.', 'iyi'); iceriAl(o); }
+          if (o) { iceriAl(o); }
           else girisCiz('Şifren yenilendi. Yeni şifrenle meclise gir.', 'bilgi');
         });
       }).catch(function (h) { yeniSifreCiz(E.hataMetni(h)); });
@@ -303,6 +303,7 @@
       }
       E.ben = b;
       E.$('#acilis').hidden = true;
+      if (b.uzak) { uzakEkrani(); return; }
       E.ekran = 'sura';
       E.kabukCiz();
       E.git('sura');
@@ -321,6 +322,17 @@
       E.$('#a-cik').onclick = function () { E.cikisYap(); };
     });
   }
+  // meclisten uzaklaştırılan yoldaş
+  function uzakEkrani() {
+    canliDurdur();
+    var a = E.$('#acilis');
+    a.hidden = false;
+    a.innerHTML = '<div class="uzak-ekran">' + ikon('shield-off-outline') + '<b>Meclisten uzaklaştırıldın</b>' +
+      '<span>Hesabın, Adap ve Usul\'e aykırı davranışlar nedeniyle yönetim tarafından kapatıldı. Bir yanlışlık olduğunu düşünüyorsan erkamsocialmedya@gmail.com adresine yaz.</span>' +
+      '<button class="tekrar" id="u-cik">Çıkış Yap</button></div>';
+    E.$('#u-cik').onclick = function () { E.cikisYap(); };
+  }
+  E.uzakEkrani = uzakEkrani;
   function disariAl() {
     canliDurdur();
     E.oturum = null; E.ben = null; girenKimlik = null;

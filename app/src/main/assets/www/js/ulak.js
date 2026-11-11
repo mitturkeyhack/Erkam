@@ -103,7 +103,7 @@
         x.fillText((y.isim || 'Y').charAt(0).toLocaleUpperCase('tr'), sx + 50, sy + 52); x.textAlign = 'left'; }
       x.restore();
       x.fillStyle = '#059669'; x.font = '800 40px ' + FONT; x.fillText(y.isim || 'Yoldaş', sx + 128, sy + 32);
-      if (y.rol === 'yonetim') {
+      if (y.rol === 'yonetim' || y.onayli) {
         var nw = x.measureText(y.isim || 'Yoldaş').width;
         x.save(); x.translate(sx + 128 + nw + 10, sy + 12); x.scale(40 / 24, 40 / 24); x.fillStyle = '#059669';
         x.fill(new Path2D(window.IKON['check-decagram'])); x.restore();
