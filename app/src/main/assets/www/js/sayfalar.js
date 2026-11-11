@@ -10,9 +10,9 @@
       ad: 'kelam', kelamId: id,
       html: E.sayfaBasligi('<div class="ad">Kelam</div>', '<button class="ikb" data-is="kelam-menu-ust" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>') +
         '<div class="ic"><div class="yukleniyor"><div class="cark"></div></div></div>' +
-        '<div class="yaz"><textarea rows="1" maxlength="500" placeholder="Kelamını nakşet..."></textarea><button aria-label="Gönder" disabled>' + ikon('send') + '</button></div>',
+        '<div class="yaz-kap"><div class="kime" hidden></div><div class="yaz"><textarea rows="1" maxlength="500" placeholder="Cevabını nakşet..."></textarea><button aria-label="Gönder" disabled>' + ikon('send') + '</button></div></div>',
       kur: function (el) {
-        var ic = E.$('.ic', el), alan = E.$('.yaz textarea', el), dgm = E.$('.yaz button', el);
+        var ic = E.$('.ic', el), alan = E.$('.yaz textarea', el), dgm = E.$('.yaz button', el), kime = E.$('.kime', el);
         function ciz() {
           ic.innerHTML = '<div style="height:20px"></div>' + E.kelamKart(veri.kelam, { acik: true }) +
             (veri.cevaplar.length ? '<div class="ara-bolum">CEVAPLAR</div>' + veri.cevaplar.map(function (c) { return E.kelamKart(c, { cevap: true, zamanUstte: true }); }).join('')
@@ -20,8 +20,11 @@
         }
         function yukle() {
           return E.rpc('kelam_detay', { p_id: id }).then(function (d) {
-            if (!d || !d.kelam) { ic.innerHTML = '<div class="bos-not">' + ikon('alert-circle-outline') + 'Aradığın kelam mecliste bulunamadı.</div>'; E.$('.yaz', el).hidden = true; return; }
+            if (!d || !d.kelam) { ic.innerHTML = '<div class="bos-not">' + ikon('alert-circle-outline') + 'Aradığın kelam mecliste bulunamadı.</div>'; E.$('.yaz-kap', el).hidden = true; return; }
             veri = d; tanim.veri = d; ciz();
+            var y = d.kelam.yazar || {};
+            kime.hidden = false;
+            kime.innerHTML = ikon('forum-outline') + (E.ben && y.id === E.ben.id ? 'Kendi kelamına cevap' : '<b>@' + esc(y.kunye || '') + '</b> kelamına cevap');
           }).catch(function (h) { ic.innerHTML = '<div class="bos-not">' + ikon('wifi-off') + esc(E.hataMetni(h)) + '</div>'; });
         }
         tanim.yukle = yukle;
@@ -335,7 +338,7 @@
   var BILDIRIM = {
     hosgeldin: ['sari', 'shield-check', function () { return 'ERKAM ağına hoş geldin yoldaş!'; }],
     tasdik: ['yesil', 'star-crescent', function (k) { return k + ' kelamını tasdikledi.'; }],
-    cevap: ['yesil', 'comment-text-outline', function (k) { return k + ' kelamına cevap verdi.'; }],
+    cevap: ['yesil', 'forum-outline', function (k) { return k + ' kelamına cevap verdi.'; }],
     etiket: ['mavi', 'at', function (k) { return k + ' seni bir kelamda etiketledi.'; }],
     yoldas: ['yesil', 'account-plus', function (k) { return k + ' seni yoldaş edindi.'; }],
     istek: ['sari', 'account-clock', function (k) { return k + ' yoldaşlık isteği gönderdi.'; }],
