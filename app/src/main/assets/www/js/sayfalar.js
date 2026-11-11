@@ -24,7 +24,7 @@
             veri = d; tanim.veri = d; ciz();
             var y = d.kelam.yazar || {};
             kime.hidden = false;
-            kime.innerHTML = ikon('forum-outline') + (E.ben && y.id === E.ben.id ? 'Kendi kelamına cevap' : '<b>@' + esc(y.kunye || '') + '</b> kelamına cevap');
+            kime.innerHTML = ikon('handshake-outline') + (E.ben && y.id === E.ben.id ? 'Kendi kelamına cevap' : '<b>@' + esc(y.kunye || '') + '</b> kelamına cevap');
           }).catch(function (h) { ic.innerHTML = '<div class="bos-not">' + ikon('wifi-off') + esc(E.hataMetni(h)) + '</div>'; });
         }
         tanim.yukle = yukle;
@@ -338,7 +338,7 @@
   var BILDIRIM = {
     hosgeldin: ['sari', 'shield-check', function () { return 'ERKAM ağına hoş geldin yoldaş!'; }],
     tasdik: ['yesil', 'star-crescent', function (k) { return k + ' kelamını tasdikledi.'; }],
-    cevap: ['yesil', 'forum-outline', function (k) { return k + ' kelamına cevap verdi.'; }],
+    cevap: ['yesil', 'handshake-outline', function (k) { return k + ' kelamına cevap verdi.'; }],
     etiket: ['mavi', 'at', function (k) { return k + ' seni bir kelamda etiketledi.'; }],
     yoldas: ['yesil', 'account-plus', function (k) { return k + ' seni yoldaş edindi.'; }],
     istek: ['sari', 'account-clock', function (k) { return k + ' yoldaşlık isteği gönderdi.'; }],

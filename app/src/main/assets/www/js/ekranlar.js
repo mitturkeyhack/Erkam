@@ -34,7 +34,7 @@
       '<button data-is="tasdik" data-id="' + k.id + '" class="t' + (k.tasdikledim ? ' acik' : '') + '">' +
       ikon('star-crescent') + '<span>' + (k.tasdik_sayisi || 0) + '</span></button>';
     if (!o.cevap) {
-      h += '<button data-is="' + (o.acik ? 'cevap-odak' : 'kelam-ac') + '" data-id="' + k.id + '">' + ikon('forum-outline') +
+      h += '<button data-is="' + (o.acik ? 'cevap-odak' : 'kelam-ac') + '" data-id="' + k.id + '">' + ikon('handshake-outline') +
         '<span>' + (k.cevap_sayisi || 0) + '</span></button>';
     }
     h += '<button data-is="heybe" data-id="' + k.id + '" class="heybe' + (k.heybemde ? ' acik' : '') + '" aria-label="Heybe">' +
