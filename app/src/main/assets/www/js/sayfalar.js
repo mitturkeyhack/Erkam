@@ -285,12 +285,17 @@
         function gundem() {
           ic.innerHTML = '<div class="yukleniyor"><div class="cark"></div></div>';
           var s = ++sayac;
-          E.rpc('muhur_gundemi').then(function (d) {
+          E.rpc('revacta').then(function (d) {
             if (s !== sayac) return;
-            d = d || [];
-            ic.innerHTML = d.length ? '<div class="ara-bolum">MECLİSİN GÜNDEMİ</div><div class="muhur-liste">' + d.map(function (m) {
-              return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m.muhur) + '">' + ikon('stamper') + esc(m.muhur) + ' · ' + m.sayi + '</button>';
-            }).join('') + '</div>' : '<div class="bos-not">' + ikon('magnify') + 'Kelam, yoldaş veya mühür ara.</div>';
+            var l = (d && d.liste) || [], p = (d && d.pencere) || '';
+            if (!l.length) { ic.innerHTML = '<div class="bos-not">' + ikon('magnify') + 'Kelam, yoldaş veya mühür ara.</div>'; return; }
+            ic.innerHTML = '<div class="rv-bas"><b>' + ikon('star-crescent') + 'Revaçta</b><span>' +
+              (p === 'tümü' ? 'Tüm zamanlar' : 'Son ' + esc(p)) + '</span></div>' +
+              l.map(function (m, i) {
+                return '<button class="rv-satir" data-is="muhur-ac" data-muhur="' + esc(m.muhur) + '"><span class="rv-no">' + (i + 1) + '</span>' +
+                  '<span class="rv-o"><small>' + (i < 3 ? 'Mecliste revaçta' : 'Meclis gündeminde') + (m.yoldas > 1 ? ' · ' + m.yoldas + ' yoldaş' : '') + '</small>' +
+                  '<b>#' + esc(m.muhur) + '</b><small>' + m.sayi + ' kelam</small></span>' + ikon('chevron-right') + '</button>';
+              }).join('');
           }).catch(function () { if (s === sayac) ic.innerHTML = '<div class="bos-not">' + ikon('magnify') + 'Kelam, yoldaş veya mühür ara.</div>'; });
         }
         function ara() {
