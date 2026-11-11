@@ -631,4 +631,90 @@
     };
     setTimeout(function () { alan.focus(); }, 150);
   };
+
+  // ---------- Yoldaş listesi (Yoldaş Edindiği / Yoldaşları) ----------
+  E.is['yoldas-liste'] = function (el) {
+    var id = el.getAttribute('data-id'), t = E.yigin[E.yigin.length - 1];
+    var p = E.ben && E.ben.id === id ? E.ben : (t && t.profil && t.profil.id === id ? t.profil : { id: id });
+    E.yoldasListeSayfa(p, el.getAttribute('data-yon') || 'edindigi');
+  };
+  E.yoldasListeSayfa = function (p, yon) {
+    var benim = E.ben && p.id === E.ben.id, liste = [], aramaZ = 0, istek = 0;
+    var say = { edindigi: p.takip_edilen_sayisi, yoldaslari: p.yoldas_sayisi };
+    function sekme(y, ad) {
+      return '<button data-yon="' + y + '" class="' + (yon === y ? 'aktif' : '') + '">' + ad +
+        (say[y] != null ? '<i>' + say[y] + '</i>' : '') + '</button>';
+    }
+    var tanim = {
+      ad: 'yoldas-liste',
+      html: E.sayfaBasligi('<div class="ad">' + esc(p.isim || 'Yoldaş') + (p.kunye ? '<small>@' + esc(p.kunye) + '</small>' : '') + '</div>') +
+        '<div class="yl-sekme">' + sekme('edindigi', 'Yoldaş Edindiği') + sekme('yoldaslari', 'Yoldaşları') + '</div>' +
+        '<div class="ic"><label class="ara-kutu yl-ara">' + ikon('magnify') + '<input placeholder="Yoldaş ara..." autocomplete="off"></label><div class="yl-liste"></div></div>',
+      kur: function (el) {
+        var kap = E.$('.yl-liste', el), girdi = E.$('.yl-ara input', el), sek = E.$('.yl-sekme', el);
+        function dugme(k) {
+          if (k.iliski === 'ben') return '';
+          var d = k.iliski === 'onayli' ? ['cerceve', 'Yoldaşsın'] : k.iliski === 'bekliyor' ? ['cerceve', 'İstek Gönderildi'] : ['dolu', 'Yoldaş Edin'];
+          return '<button class="yl-dgm ' + d[0] + '" data-y="' + esc(k.id) + '">' + d[1] + '</button>';
+        }
+        function satir(k) {
+          return '<div class="yl-satir" data-kunye="' + esc(k.kunye) + '">' + E.avatar(k) +
+            '<div class="yl-o"><b>' + esc(k.isim || 'Yoldaş') + (k.rol === 'yonetim' ? ikon('check-decagram') : '') + '</b>' +
+            '<span>@' + esc(k.kunye) + (k.karsilikli && k.iliski !== 'ben' ? '<em>' + ikon('handshake-outline') + 'Karşılıklı</em>' : '') + '</span>' +
+            (k.biyografi ? '<p>' + esc(k.biyografi) + '</p>' : '') + '</div>' + dugme(k) + '</div>';
+        }
+        function ciz() {
+          var q = girdi.value.trim();
+          if (liste.length) { kap.innerHTML = liste.map(satir).join(''); return; }
+          var bos = q ? 'Bu adla bir yoldaş bulunamadı.'
+            : yon === 'edindigi' ? (benim ? 'Henüz kimseyi yoldaş edinmedin.' : 'Henüz kimseyi yoldaş edinmemiş.')
+            : (benim ? 'Henüz seni yoldaş edinen olmadı.' : 'Henüz yoldaşı yok.');
+          kap.innerHTML = '<div class="bos-not">' + ikon('account-group') + bos + '</div>';
+        }
+        function yukle() {
+          var no = ++istek;
+          kap.innerHTML = '<div class="yukleniyor"><div class="cark"></div></div>';
+          return E.rpc('yoldas_listesi', { p_kisi: p.id, p_yon: yon, p_metin: girdi.value.trim() || null }).then(function (d) {
+            if (no !== istek) return;
+            liste = d || [];
+            if (!girdi.value.trim()) { say[yon] = liste.length; E.$('[data-yon="' + yon + '"]', sek).innerHTML = (yon === 'edindigi' ? 'Yoldaş Edindiği' : 'Yoldaşları') + '<i>' + liste.length + '</i>'; }
+            ciz();
+          }, function (h) {
+            if (no !== istek) return;
+            kap.innerHTML = '<div class="bos-not">' + ikon('incognito-circle') + esc(E.hataMetni(h)) + '</div>';
+          });
+        }
+        sek.onclick = function (o) {
+          var b = o.target.closest('[data-yon]');
+          if (!b || b.getAttribute('data-yon') === yon) return;
+          yon = b.getAttribute('data-yon');
+          [].forEach.call(sek.children, function (x) { x.classList.toggle('aktif', x === b); });
+          liste = []; yukle();
+        };
+        girdi.oninput = function () { clearTimeout(aramaZ); aramaZ = setTimeout(yukle, 300); };
+        kap.onclick = function (o) {
+          var b = o.target.closest('[data-y]');
+          if (b) {
+            var k = liste.filter(function (x) { return x.id === b.getAttribute('data-y'); })[0];
+            if (!k) return;
+            var onay = k.iliski === 'yok' ? Promise.resolve(true)
+              : E.sor(k.iliski === 'onayli' ? 'Yoldaşlığı Bırak' : 'İsteği Geri Al', '@' + k.kunye + (k.iliski === 'onayli' ? ' ile yoldaşlığın bırakılacak.' : ' için gönderdiğin istek geri alınacak.'), 'Bırak', true);
+            return onay.then(function (evet) {
+              if (!evet) return;
+              b.disabled = true;
+              return E.rpc('yoldas_degistir', { p_kisi: k.id }).then(function (r) {
+                k.iliski = r; b.outerHTML = dugme(k);
+                if (benim && yon === 'edindigi') { E.ben.takip_edilen_sayisi = Math.max(0, (E.ben.takip_edilen_sayisi || 0) + (r === 'yok' ? -1 : r === 'onayli' ? 1 : 0)); }
+              }, function (h) { b.disabled = false; throw h; });
+            });
+          }
+          var s = o.target.closest('.yl-satir');
+          if (s) E.yoldasSayfa(s.getAttribute('data-kunye'));
+        };
+        tanim.donunce = function () { yukle(); };
+        yukle();
+      }
+    };
+    E.sayfaAc(tanim);
+  };
 })();

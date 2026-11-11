@@ -300,8 +300,8 @@
       h += '<div class="profil-dgm"><button class="' + d[0] + '" data-is="yoldas-edin" data-id="' + esc(p.id) + '">' + ikon(d[1]) + d[2] + '</button>' +
         '<button class="cerceve" data-is="mesaj-yaz" data-id="' + esc(p.id) + '">' + ikon('message-text-outline') + 'Mesaj</button></div>';
     }
-    h += '</div><div class="sayilar"><div><b>' + (p.takip_edilen_sayisi || 0) + '</b><span>Yoldaş Edindiği</span></div>' +
-      '<div><b>' + (p.yoldas_sayisi || 0) + '</b><span>Yoldaşları</span></div></div>';
+    h += '</div><div class="sayilar"><button data-is="yoldas-liste" data-id="' + esc(p.id) + '" data-yon="edindigi"><b>' + (p.takip_edilen_sayisi || 0) + '</b> Yoldaş Edindiği</button>' +
+      '<i></i><button data-is="yoldas-liste" data-id="' + esc(p.id) + '" data-yon="yoldaslari"><b>' + (p.yoldas_sayisi || 0) + '</b> Yoldaşları</button></div>';
     return h;
   };
   E.profilSekmeleri = function (kap, p, benim, durum) {
@@ -329,21 +329,6 @@
     ciz();
     E.beniYenile().then(function (degisti) { if (degisti && E.ekran === 'profil' && !E.yigin.length) ciz(); });
   };
-  E.is['gorsel-degis'] = function (el) {
-    var tur = el.getAttribute('data-tur');
-    return E.dosyaSec().then(function (dosya) {
-      if (!dosya) return;
-      E.tost('Görsel işleniyor...');
-      return E.gorselYukle(dosya, tur, tur === 'avatar' ? 480 : 1400).then(function (yol) {
-        return E.rpc('profil_gorsel', { p_tur: tur, p_yol: yol });
-      }).then(function (b) {
-        E.ben = b;
-        E.tost('Görsel mühürlendi.', 'iyi');
-        E.kabukYenile();
-      });
-    });
-  };
-
   // ---------- Künye ----------
   EKRAN.kunye = function (g) {
     var b = E.ben;
