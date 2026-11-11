@@ -245,6 +245,10 @@
           if (!d) { ic.innerHTML = '<div class="bos-not">Ders bulunamadı.</div>'; return; }
           yuzde = d.yuzde || 0; cubuk.style.width = yuzde + '%';
           var h = '<div class="baslik" style="padding-bottom:6px"><span class="ikon-kutu">' + ikon(d.ikon) + '</span><div><h2 style="font-size:24px">' + esc(d.baslik) + '</h2><p>' + d.sure_dk + ' dk okuma</p></div></div><div class="okuma">';
+          if (!String(d.icerik || '').trim()) {
+            ic.innerHTML = h + '<div class="bos-not">' + ikon('book-open-variant') + 'Bu dersin içeriği yakında eklenecek yoldaş.</div></div>';
+            return;
+          }
           String(d.icerik || '').split(/\n\s*\n/).forEach(function (blok) {
             blok = blok.trim();
             if (!blok) return;

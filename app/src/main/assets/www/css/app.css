@@ -188,6 +188,7 @@ html[data-tema="acik"] .giris .hata { color: #b91c1c; }
 .ders p { margin: 14px 0 18px; color: var(--soluk); font-size: 15px; line-height: 1.5; }
 .cubuk { height: 6px; border-radius: 3px; background: var(--kutu); overflow: hidden; }
 .cubuk i { display: block; height: 100%; border-radius: 3px; background: var(--vurgu); }
+.ders p.yakinda { font-style: italic; color: var(--soluk2); }
 .ders .durum { margin-top: 10px; text-align: right; color: var(--soluk2); font-weight: 700; font-size: 13px; }
 .okuma { padding: 6px 24px 60px; }
 .okuma h3 { margin: 26px 0 8px; font-size: 20px; color: var(--vurgu); font-weight: 800; }
@@ -351,14 +352,28 @@ html[data-tema="acik"] .anahtar.acik { background: var(--vurgu); border-color: v
 /* ---------- Çekmece ---------- */
 .perde { position: absolute; inset: 0; background: var(--perde); z-index: 20; animation: belir 0.15s; }
 @keyframes belir { from { opacity: 0; } to { opacity: 1; } }
-.cekmece { position: absolute; top: 0; bottom: 0; left: 0; width: 80%; max-width: 340px; background: var(--kart); z-index: 21;
-  padding: 44px 0 20px; animation: kay 0.2s ease-out; overflow-y: auto; }
+.cekmece { position: absolute; top: 0; bottom: 0; left: 0; width: 84%; max-width: 350px; background: var(--kart); z-index: 21;
+  display: flex; flex-direction: column; animation: kay 0.2s ease-out; box-shadow: 8px 0 30px rgba(15, 23, 42, 0.2); }
 @keyframes kay { from { transform: translateX(-100%); } to { transform: none; } }
-.cekmece .marka { display: flex; align-items: center; gap: 12px; padding: 0 26px 26px; color: var(--vurgu); font-size: 30px; font-weight: 900;
-  border-bottom: 1px solid var(--cizgi); margin: 0 24px 22px 24px; padding-left: 2px; }
-.cekmece .marka svg { width: 32px; height: 32px; }
-.cekmece button { display: flex; align-items: center; gap: 22px; width: 100%; padding: 17px 28px; font-size: 20px; color: var(--yazi); text-align: left; }
-.cekmece button svg { width: 26px; height: 26px; color: var(--vurgu); }
+.cm-bas { position: relative; overflow: hidden; display: block; width: 100%; text-align: left; padding: 30px 24px 24px; color: #fff;
+  background: linear-gradient(140deg, #047857, #10b981 70%, #34d399); }
+.cm-dev { position: absolute; right: -34px; top: 6px; opacity: 0.13; }
+.cm-dev svg { width: 180px; height: 180px; }
+.cm-lg { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 900; letter-spacing: 0.5px; }
+.cm-lg svg { width: 25px; height: 25px; }
+.cm-bas .cm-av { width: 62px; height: 62px; margin-top: 22px; background: rgba(255, 255, 255, 0.22); border: 2px solid rgba(255, 255, 255, 0.6); color: #fff; }
+.cm-bas b { display: block; margin-top: 12px; font-size: 20px; font-weight: 800; }
+.cm-kn { display: block; opacity: 0.88; font-size: 14px; margin-top: 2px; }
+.cm-ic { flex: 1; overflow-y: auto; padding-bottom: 8px; }
+.cm-gb { padding: 18px 26px 6px; color: var(--soluk2); font-size: 12px; font-weight: 800; letter-spacing: 0.7px; }
+.cm-it { position: relative; display: flex; align-items: center; gap: 20px; width: 100%; padding: 13px 26px; font-size: 18px; font-weight: 600;
+  color: var(--yazi); text-align: left; }
+.cm-it svg { color: var(--vurgu); width: 25px; height: 25px; }
+.cm-it.on { color: var(--vurgu); background: var(--vurgu-zemin); }
+.cm-it.on::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 4px; border-radius: 0 4px 4px 0; background: var(--vurgu); }
+.cm-cik { flex: none; display: flex; align-items: center; gap: 14px; width: 100%; padding: 18px 26px 22px; border-top: 1px solid var(--cizgi);
+  color: var(--tehlike); font-weight: 700; font-size: 16px; text-align: left; }
+.cm-cik svg { width: 24px; height: 24px; }
 
 /* ---------- Katmanlar (alt sayfa, pencere) ---------- */
 .yaprak { position: absolute; left: 0; right: 0; bottom: 0; top: 64px; background: var(--zemin); border-radius: 26px 26px 0 0; z-index: 31;

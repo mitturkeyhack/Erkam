@@ -187,12 +187,21 @@
 
   // ---------- çekmece ----------
   E.is.cekmece = function () {
-    var m = [['profil', 'account-circle', 'Profil'], ['kunye', 'account-edit', 'Künye'], ['adap', 'scale-balance', 'Adap ve Usul'],
-      ['gayemiz', 'compass-rose', 'Gayemiz'], ['nizam', 'cog', 'Nizam'], ['heybe', 'bag-personal', 'Heybe']];
+    var b = E.ben || {};
+    function it(x) {
+      return '<button class="cm-it' + (E.ekran === x[0] ? ' on' : '') + '" data-is="cekmece-git" data-ekran="' + x[0] + '">' + ikon(x[1]) + x[2] + '</button>';
+    }
     E.$('#cekmece-kok').innerHTML = '<div class="perde" data-is="cekmece-kapat"></div><div class="cekmece">' +
-      '<div class="marka">' + ikon('star-crescent') + 'ERKAM</div>' +
-      m.map(function (x) { return '<button data-is="cekmece-git" data-ekran="' + x[0] + '">' + ikon(x[1]) + x[2] + '</button>'; }).join('') + '</div>';
+      '<button class="cm-bas" data-is="cekmece-git" data-ekran="profil"><span class="cm-dev">' + ikon('star-crescent') + '</span>' +
+      '<span class="cm-lg">' + ikon('star-crescent') + 'ERKAM</span>' + E.avatar(b, 'cm-av') +
+      '<b>' + esc(b.isim || '') + '</b><span class="cm-kn">@' + esc(b.kunye || '') + '</span></button>' +
+      '<div class="cm-ic"><div class="cm-gb">MECLİS</div>' +
+      [['profil', 'account-circle', 'Profil'], ['kunye', 'account-edit', 'Künye'], ['heybe', 'bag-personal', 'Heybe']].map(it).join('') +
+      '<div class="cm-gb">ERKAM</div>' +
+      [['adap', 'scale-balance', 'Adap ve Usul'], ['gayemiz', 'compass-rose', 'Gayemiz'], ['nizam', 'cog', 'Nizam']].map(it).join('') +
+      '</div><button class="cm-cik" data-is="cekmece-cikis">' + ikon('logout') + 'Meclisten Ayrıl</button></div>';
   };
+  E.is['cekmece-cikis'] = function () { E.cekmeceKapat(); return E.is.cikis(); };
   E.cekmeceKapat = function () { E.$('#cekmece-kok').innerHTML = ''; };
   E.is['cekmece-kapat'] = E.cekmeceKapat;
   E.is['cekmece-git'] = function (el) { E.cekmeceKapat(); E.git(el.getAttribute('data-ekran')); };
@@ -219,7 +228,7 @@
         var durum = x.yuzde >= 100 ? 'Tamamlandı' : x.yuzde > 0 ? '%' + x.yuzde + ' Okundu' : 'Başlamadı';
         return '<div class="kart ders" data-is="ders-ac" data-id="' + x.id + '"><div class="ust-satir"><span class="ikon-kutu">' + ikon(x.ikon) + '</span>' +
           '<div class="ad"><small>' + esc(SUFFE_KAT[x.kategori] || '') + '</small><b>' + esc(x.baslik) + '</b></div>' +
-          '<span class="sure">' + ikon('clock-outline') + x.sure_dk + ' dk</span></div><p>' + esc(x.ozet) + '</p>' +
+          '<span class="sure">' + ikon('clock-outline') + x.sure_dk + ' dk</span></div>' + (x.ozet ? '<p>' + esc(x.ozet) + '</p>' : '<p class="yakinda">İçerik yakında eklenecek.</p>') +
           '<div class="cubuk"><i style="width:' + Math.max(0, Math.min(100, x.yuzde)) + '%"></i></div><div class="durum">' + durum + '</div></div>';
       }).join('') : '<div class="bos-not">Bu rafta henüz ders yok.</div>';
     }
@@ -401,7 +410,7 @@
       '<button class="satir" data-is="ayar-biyometrik"><span class="ikon-kutu">' + ikon('fingerprint') + '</span><span class="orta"><b>Biyometrik Mühür</b><span>Girişte parmak izi / yüz tanıma ister</span></span>' + anahtar(E.tercih('biyometrik') === '1') + '</button>' +
       '<button class="satir" data-is="ayar-izole"><span class="ikon-kutu">' + ikon('incognito-circle') + '</span><span class="orta"><b>İzole Kimlik (Gizli Hesap)</b><span>Profilini sadece tasdikli yoldaşlar görür</span></span>' + anahtar(b.izole) + '</button></div>' +
       '<div class="bolum">SİSTEM TERCİHLERİ</div><div class="grup">' +
-      '<button class="satir" data-is="ayar-fecr"><span class="ikon-kutu">' + ikon('theme-light-dark') + '</span><span class="orta"><b>Fecr Modu (Açık Tema)</b><span>Meclis arayüzünü aydınlatır</span></span>' + anahtar(E.tercih('fecr') === '1') + '</button>' +
+      '<button class="satir" data-is="ayar-fecr"><span class="ikon-kutu">' + ikon('theme-light-dark') + '</span><span class="orta"><b>Fecr Modu (Açık Tema)</b><span>Meclis arayüzünü aydınlatır</span></span>' + anahtar(E.tercih('fecr') !== '0') + '</button>' +
       '<button class="satir" data-is="ayar-bildirim"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Meclis Bildirimleri</b><span>Yeni kelam ve mesajları bildir</span></span>' + anahtar(E.tercih('bildirim') !== '0') + '</button></div>' +
       '<div class="bolum">HESAP YÖNETİMİ</div><div class="grup">' +
       '<button class="satir duz" data-is="cekmece-git" data-ekran="kunye">' + ikon('at') + '<span class="orta"><b>Künye (Kullanıcı Adı) Değiştir</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
@@ -413,7 +422,7 @@
       '<div class="surum">ERKAM v' + esc(surum) + '</div>';
   };
   E.is['ayar-fecr'] = function () {
-    E.tercih('fecr', E.tercih('fecr') === '1' ? '0' : '1');
+    E.tercih('fecr', E.tercih('fecr') !== '0' ? '0' : '1');
     E.temaUygula();
     E.kabukYenile(true);
   };

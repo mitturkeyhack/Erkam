@@ -131,7 +131,7 @@
     return deger;
   };
   E.temaUygula = function () {
-    var acik = E.tercih('fecr') === '1';
+    var acik = E.tercih('fecr') !== '0'; // varsayılan: Fecr Modu (açık tema)
     document.documentElement.setAttribute('data-tema', acik ? 'acik' : 'koyu');
     try { if (window.Android && Android.tema) Android.tema(acik ? 'acik' : 'koyu'); } catch (e) { /* köprü yok */ }
   };
