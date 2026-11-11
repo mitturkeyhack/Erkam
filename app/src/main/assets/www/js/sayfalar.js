@@ -386,16 +386,62 @@
   // ---------- Yeni Neşir ----------
   // Medya seçildiği an küçültülüp yüklenmeye başlar; Neşret'e basınca "nakşediliyor" ekranı kalanı bekler.
   E.is.nesret = function () {
-    var kategori = 'ilim', medya = [], mesgul = false, naksedildi = false, sira = 0;
+    var kategori = 'ilim', medya = [], mesgul = false, naksedildi = false, sira = 0, muhurler = [], gundem = [];
+    var ben = E.ben || {};
     var n = E.katmanAc('<div class="nb"><button class="kapat" data-is="katman-kapat" aria-label="Kapat">' + ikon('close') + '</button><h3>Yeni Neşir</h3>' +
-      '<button class="gonder" disabled>Neşret</button></div><div class="cipler"></div>' +
-      '<div class="nesir-ic"><textarea maxlength="600" placeholder="İlmini veya tecrübeni meclise nakşet..."></textarea><div class="oz"></div></div>' +
-      '<label class="muhur-kutu">' + ikon('stamper') + '<span>Mühür:</span><input placeholder="Örn: sibergüvenlik, kpss" autocapitalize="none" autocomplete="off" maxlength="120"></label>' +
+      '<button class="gonder" disabled>Neşret</button></div>' +
+      '<div class="nesir-ic"><div class="nk">' +
+        '<div class="nk-bas">' + E.avatar(ben) + '<div><b>' + esc(ben.isim || 'Yoldaş') + (ben.rol === 'yonetim' ? ikon('check-decagram') : '') + '</b><small>@' + esc(ben.kunye || '') + '</small></div></div>' +
+        '<textarea rows="3" maxlength="600" placeholder="Meclise ne nakşetmek istersin?"></textarea>' +
+        '<div class="oz"></div>' +
+        '<div class="nk-muhur"><span class="nk-cipler"></span><label class="nk-ekle">' + ikon('pound') + '<input placeholder="mühür ekle" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="31"></label></div>' +
+        '<div class="nk-oneri"></div>' +
+      '</div></div>' +
       '<div class="araclar"><button data-a="foto" aria-label="Fotoğraf ekle">' + ikon('image-plus') + '</button>' +
       '<button data-a="video" aria-label="Video ekle">' + ikon('video-plus') + '</button>' +
-      '<button data-a="liste" aria-label="Liste">' + ikon('format-list-bulleted') + '</button><span class="say">0/500</span></div>', 'nesir');
-    var alan = E.$('textarea', n), gonder = E.$('.gonder', n), say = E.$('.say', n), cip = E.$('.cipler', n), oz = E.$('.oz', n),
-      muhur = E.$('.muhur-kutu input', n), btnFoto = E.$('[data-a="foto"]', n), btnVideo = E.$('[data-a="video"]', n);
+      '<span class="say"><i></i><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15"></circle><circle class="d" cx="18" cy="18" r="15"></circle></svg></span></div>', 'nesir');
+    var alan = E.$('textarea', n), gonder = E.$('.gonder', n), say = E.$('.say', n), oz = E.$('.oz', n),
+      muhur = E.$('.nk-ekle input', n), mcip = E.$('.nk-cipler', n), oneri = E.$('.nk-oneri', n),
+      btnFoto = E.$('[data-a="foto"]', n), btnVideo = E.$('[data-a="video"]', n);
+
+    // ---- mühürler: # rozetleri ----
+    function muhurTemiz(m) { return (m || '').toLocaleLowerCase('tr').replace(/[^a-z0-9çğıöşü_]/g, '').slice(0, 30); }
+    function muhurCiz() {
+      mcip.innerHTML = muhurler.map(function (m) {
+        return '<button class="nk-m" data-m="' + esc(m) + '">' + ikon('pound') + esc(m) + ikon('close') + '</button>';
+      }).join('');
+      E.$('.nk-ekle', n).hidden = muhurler.length >= 5;
+      oneriCiz();
+    }
+    function muhurEkle(m) {
+      m = muhurTemiz(m);
+      if (m.length < 2 || muhurler.indexOf(m) !== -1 || muhurler.length >= 5) return false;
+      muhurler.push(m); muhurCiz(); return true;
+    }
+    function oneriCiz() {
+      var q = muhurTemiz(muhur.value);
+      var l = gundem.filter(function (g) { return muhurler.indexOf(g.muhur) === -1 && (!q || g.muhur.indexOf(q) === 0); }).slice(0, 6);
+      oneri.innerHTML = (document.activeElement === muhur && l.length) ? l.map(function (g) {
+        return '<button data-o="' + esc(g.muhur) + '">#' + esc(g.muhur) + '<small>' + g.sayi + '</small></button>';
+      }).join('') : '';
+    }
+    muhur.addEventListener('input', function () {
+      if (/[\s,#]/.test(muhur.value)) {
+        muhur.value.split(/[\s,#]+/).forEach(function (x, i, l) { if (i < l.length - 1) muhurEkle(x); });
+        muhur.value = muhur.value.split(/[\s,#]+/).pop();
+      }
+      oneriCiz();
+    });
+    muhur.addEventListener('keydown', function (o) {
+      if (o.key === 'Enter') { o.preventDefault(); if (muhurEkle(muhur.value)) muhur.value = ''; oneriCiz(); }
+      else if (o.key === 'Backspace' && !muhur.value && muhurler.length) { muhurler.pop(); muhurCiz(); }
+    });
+    muhur.addEventListener('focus', oneriCiz);
+    muhur.addEventListener('blur', function () { setTimeout(function () { if (muhurEkle(muhur.value)) muhur.value = ''; oneriCiz(); }, 150); });
+    mcip.onclick = function (o) { var b = o.target.closest('[data-m]'); if (b) { muhurler.splice(muhurler.indexOf(b.getAttribute('data-m')), 1); muhurCiz(); } };
+    oneri.addEventListener('mousedown', function (o) { o.preventDefault(); });
+    oneri.onclick = function (o) { var b = o.target.closest('[data-o]'); if (b) { muhurEkle(b.getAttribute('data-o')); muhur.value = ''; muhur.focus(); oneriCiz(); } };
+    E.rpc('muhur_gundemi').then(function (d) { gundem = d || []; oneriCiz(); }, function () { /* önemsiz */ });
 
     // katman kapanırsa: yarım kalan yüklemeleri durdur, yüklenenleri sil
     n.parentNode._kapaninca = function () {
@@ -407,20 +453,17 @@
       E.dosyaSil([].concat.apply([], medya.map(function (m) { return [m.yol, m.kapak]; })));
     };
 
-    function cipCiz() {
-      cip.innerHTML = ['ilim', 'tecrube', 'infak', 'adap'].map(function (k) {
-        return '<button class="cip' + (k === kategori ? ' aktif' : '') + '" data-kat="' + k + '">' + E.KATEGORI_AD[k] + '</button>';
-      }).join('');
-    }
     function durum() {
-      var u = alan.value.trim().length;
-      say.textContent = u + '/500';
-      say.className = 'say' + (u > 500 ? ' fazla' : '');
+      var u = alan.value.trim().length, o = Math.min(1, u / 500);
+      E.$('.d', say).style.strokeDashoffset = (94.25 * (1 - o)).toFixed(2);
+      say.className = 'say' + (u > 500 ? ' fazla' : u >= 440 ? ' yakin' : '') + (u ? ' gor' : '');
+      E.$('i', say).textContent = u >= 440 ? String(500 - u) : '';
       gonder.disabled = mesgul || u > 500 || (u < 1 && !medya.length) || medya.some(function (m) { return m.durum === 'hata'; });
       var video = medya.some(function (m) { return m.tur === 'video'; });
       btnFoto.disabled = video || medya.length >= E.FOTO_EN;
       btnVideo.disabled = medya.length > 0;
     }
+    function boyla() { alan.style.height = 'auto'; alan.style.height = Math.max(84, alan.scrollHeight) + 'px'; }
 
     // ---- medya kutuları ----
     function halka(m) {
@@ -538,19 +581,14 @@
       }
     };
 
-    cipCiz();
+    muhurCiz();
     durum();
-    cip.onclick = function (o) { var b = o.target.closest('[data-kat]'); if (b) { kategori = b.getAttribute('data-kat'); cipCiz(); } };
-    alan.oninput = durum;
+    alan.oninput = function () { boyla(); durum(); };
     E.$('.araclar', n).onclick = function (o) {
       var b = o.target.closest('[data-a]');
       if (!b || b.disabled) return;
       var a = b.getAttribute('data-a');
-      if (a === 'liste') {
-        var v = alan.value;
-        alan.value = v + (v && !/\n$/.test(v) ? '\n' : '') + '• ';
-        alan.focus(); durum();
-      } else if (a === 'foto') {
+      if (a === 'foto') {
         E.dosyalarSec('image/*', true).then(function (l) {
           var bos = E.FOTO_EN - medya.length;
           if (l.length > bos) E.tost('Bir kelama en fazla ' + E.FOTO_EN + ' fotoğraf eklenebilir.', 'kotu');
@@ -565,7 +603,8 @@
     gonder.onclick = function () {
       if (mesgul) return;
       mesgul = true; durum();
-      var muhurler = muhur.value.split(/[,\s]+/).map(function (m) { return m.replace(/^#/, '').trim(); }).filter(Boolean).slice(0, 5);
+      if (muhurEkle(muhur.value)) muhur.value = '';
+      (alan.value.match(/#[0-9A-Za-zÇĞİIÖŞÜçğıöşü_]+/g) || []).forEach(function (h) { muhurEkle(h); });
       var fotolar = medya.filter(function (m) { return m.tur === 'foto'; }), video = medya.filter(function (m) { return m.tur === 'video'; })[0];
       var ek = document.createElement('div');
       ek.className = 'naks';

@@ -640,3 +640,39 @@ html[data-tema="acik"] .anahtar.acik { background: var(--vurgu); border-color: v
 .yl-dgm { flex: none; height: 34px; padding: 0 14px; border-radius: 12px; font-size: 13px; font-weight: 800; }
 .yl-dgm.dolu { background: var(--vurgu); color: #fff; }
 .yl-dgm.cerceve { border: 1.5px solid var(--cizgi); color: var(--yazi); background: none; }
+
+/* ---------- Yeni Neşir: canlı kelam kartı ---------- */
+.nesir .nesir-ic { padding: 6px 14px 16px; }
+.nk { background: var(--kart); border-radius: 26px; padding: 18px 18px 14px; box-shadow: 0 2px 14px rgba(15, 23, 42, 0.06); border: 1px solid var(--cizgi-ince); }
+.nk-bas { display: flex; align-items: center; gap: 12px; }
+.nk-bas .avatar { width: 44px; height: 44px; }
+.nk-bas b { display: flex; align-items: center; gap: 4px; color: var(--vurgu); font-size: 16px; font-weight: 800; }
+.nk-bas b svg { width: 17px; height: 17px; }
+.nk-bas small { display: block; color: var(--soluk2); font-size: 13px; }
+.nesir .nk textarea { flex: none; display: block; width: 100%; min-height: 84px; padding: 14px 0 6px; font-size: 18px; line-height: 1.5; overflow: hidden; }
+.nk .oz .nm { margin: 6px 0 4px; }
+.nk-muhur { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; padding-top: 12px; margin-top: 8px; border-top: 1px solid var(--cizgi-ince); }
+.nk-cipler { display: contents; }
+.nk-m { display: inline-flex; align-items: center; gap: 3px; height: 32px; padding: 0 8px 0 9px; border-radius: 12px; font-size: 13.5px; font-weight: 800;
+  background: color-mix(in srgb, var(--vurgu) 12%, transparent); color: var(--vurgu); animation: belir 0.15s; }
+.nk-m svg { width: 15px; height: 15px; }
+.nk-m svg:last-child { width: 14px; height: 14px; opacity: 0.6; margin-left: 2px; }
+.nk-ekle { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border-radius: 12px; border: 1.5px dashed var(--cizgi); color: var(--soluk); flex: 1 1 120px; min-width: 120px; }
+.nk-ekle:focus-within { border-style: solid; border-color: var(--vurgu); color: var(--vurgu); }
+.nk-ekle svg { width: 16px; height: 16px; flex: none; }
+.nk-ekle input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 14px; font-weight: 700; color: var(--yazi); }
+.nk-ekle[hidden] { display: none; }
+.nk-oneri { display: flex; flex-wrap: wrap; gap: 6px; }
+.nk-oneri:not(:empty) { padding-top: 10px; }
+.nk-oneri button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 10px; background: var(--zemin); color: var(--yazi2); font-size: 13px; font-weight: 700; }
+.nk-oneri small { color: var(--soluk2); font-weight: 600; font-size: 11.5px; }
+.nesir .araclar { border-top: 1px solid var(--cizgi-ince); padding-top: 12px; }
+.nesir .araclar .say { margin-left: auto; position: relative; width: 30px; height: 30px; opacity: 0; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; }
+.nesir .araclar .say.gor { opacity: 1; }
+.nesir .araclar .say svg { position: absolute; inset: 0; width: 30px; height: 30px; transform: rotate(-90deg); }
+.nesir .araclar .say circle { fill: none; stroke: var(--cizgi); stroke-width: 3.5; }
+.nesir .araclar .say circle.d { stroke: var(--vurgu); stroke-dasharray: 94.25; stroke-dashoffset: 94.25; stroke-linecap: round; transition: stroke-dashoffset 0.15s, stroke 0.2s; }
+.nesir .araclar .say.yakin circle.d { stroke: #f59e0b; }
+.nesir .araclar .say.fazla circle.d { stroke: var(--tehlike); }
+.nesir .araclar .say i { font-style: normal; font-size: 11px; font-weight: 800; color: var(--soluk); position: relative; }
+.nesir .araclar .say.fazla i { color: var(--tehlike); }
