@@ -405,7 +405,9 @@
       '<button class="satir duz" data-is="emanet-ac">' + ikon('shield-check-outline') + '<span class="orta"><b>Emanet ve Hukuk</b><span>KVKK, gizlilik, şartlar, verilerimi indir</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="bolum">HESAP YÖNETİMİ</div><div class="grup">' +
       '<button class="satir duz" data-is="cekmece-git" data-ekran="kunye">' + ikon('at') + '<span class="orta"><b>Künye (Kullanıcı Adı) Değiştir</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
+      '<button class="satir duz" data-is="eposta-degistir">' + ikon('email-edit-outline') + '<span class="orta"><b>E-posta Adresi</b><span>' + esc((E.oturum && E.oturum.user && E.oturum.user.email) || '') + '</span></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz" data-is="sifre-guncelle">' + ikon('key-chain') + '<span class="orta"><b>Şifre Güncelle</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
+      '<button class="satir duz" data-is="cihazlar-ac">' + ikon('devices') + '<span class="orta"><b>Oturum Açık Cihazlar</b><span>Hangi telefonlarda giriş yapılı</span></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz kirmizi" data-is="cikis">' + ikon('logout') + '<span class="orta"><b>Meclisten Ayrıl (Çıkış Yap)</b></span></button></div>' +
       '<div class="grup"><button class="satir duz kirmizi" data-is="hesap-sil">' + ikon('account-remove') + '<span class="orta"><b>Hesabımı Kalıcı Olarak Sil</b></span></button></div>' +
       '<div class="grup"><button class="satir duz" data-is="guncelleme-denetle">' + ikon('cellphone-arrow-down') + '<span class="orta"><b>Güncellemeleri Denetle</b><span>Şu an: ERKAM v' + esc(surum) + '</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +

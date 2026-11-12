@@ -645,6 +645,24 @@ public class MainActivity extends Activity {
             } catch (Throwable e) { return false; }
         }
 
+        /** Oturum açık cihazlar listesi için telefonun adı, markası, modeli ve Android sürümü. */
+        @JavascriptInterface
+        public String cihazBilgi() {
+            try {
+                String ad = null;
+                try { ad = android.provider.Settings.Global.getString(ctx.getContentResolver(), "device_name"); } catch (Throwable ignored) { }
+                if (ad == null || ad.isEmpty()) {
+                    try { ad = android.provider.Settings.Secure.getString(ctx.getContentResolver(), "bluetooth_name"); } catch (Throwable ignored) { }
+                }
+                org.json.JSONObject j = new org.json.JSONObject();
+                j.put("marka", Build.MANUFACTURER);
+                j.put("model", Build.MODEL);
+                j.put("ad", ad == null ? "" : ad);
+                j.put("android", Build.VERSION.RELEASE);
+                return j.toString();
+            } catch (Throwable e) { return "{}"; }
+        }
+
         @JavascriptInterface
         public String surum() {
             try {

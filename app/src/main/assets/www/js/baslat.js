@@ -328,6 +328,7 @@
       E.bildirimKur();
       setTimeout(window.E_bildirimAc, 300);
       setTimeout(function () { if (E.guncellemeDenetle) E.guncellemeDenetle(false); }, 2500);
+      setTimeout(function () { if (E.oturumKaydet) E.oturumKaydet(); }, 1500);
     })();
   }
   // meclisten uzaklaştırılan yoldaş
