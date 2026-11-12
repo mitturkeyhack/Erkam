@@ -62,6 +62,30 @@
     E.sayfaAc(tanim);
   };
 
+  // ---------- Sunucu kotası ----------
+  function boyut(b) { return b >= 1073741824 ? (b / 1073741824).toFixed(2) + ' GB' : b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB'; }
+  function kotaCiz(kap) {
+    if (!kap) return;
+    E.rpc('yonetim_kota').then(function (k) {
+      var l = [
+        ['database-outline', 'Veritabanı', k.veritabani, k.veritabani_sinir, boyut],
+        ['image-multiple-outline', 'Dosya deposu', k.depolama, k.depolama_sinir, boyut],
+        ['account-clock-outline', 'Aylık aktif yoldaş', k.aylik_aktif, k.aylik_aktif_sinir, function (n) { return String(n); }]
+      ];
+      var uyari = l.filter(function (x) { return x[2] / x[3] >= 0.8; });
+      kap.innerHTML = (uyari.length ? '<div class="ym-kota-uy">' + ikon('alert') + '<span><b>' + uyari.map(function (x) { return x[1]; }).join(', ') +
+          '</b> sınırın %80\'ini geçti. Pro plana geçmeyi ya da temizlik yapmayı düşün.</span></div>' : '') +
+        l.map(function (x) {
+          var o = Math.min(100, x[2] * 100 / x[3]);
+          return '<div class="ym-kota-s' + (o >= 80 ? ' dolu' : o >= 60 ? ' yarim' : '') + '"><div class="ym-kota-b">' + ikon(x[0]) + '<span>' + x[1] + '</span><b>' +
+            x[4](x[2]) + ' / ' + x[4](x[3]) + '</b></div><div class="ym-kota-c"><i style="width:' + Math.max(o, 1.5).toFixed(1) + '%"></i></div><small>%' +
+            (o < 1 ? o.toFixed(2) : o.toFixed(0)) + ' dolu</small></div>';
+        }).join('') +
+        '<div class="ym-kota-alt">' + ikon('information-outline') + '<span>Son 24 saatte <b>' + k.gunluk_aktif + '</b> aktif yoldaş · ' + k.dosya + ' dosya. ' +
+          'Aylık veri çıkışı (5 GB) yalnızca Supabase panelindeki Usage sayfasında görünür.</span></div>';
+    }, function (h) { kap.innerHTML = '<div class="bos-not">' + esc(E.hataMetni(h)) + '</div>'; });
+  }
+
   // ---------- Genel bakış ----------
   function genel(ic, rozet, ac) {
     E.rpc('yonetim_ozet').then(function (o) {
@@ -86,12 +110,14 @@
             return '<div class="ym-gun"><div class="ym-cubuk"><i class="c1" style="height:' + Math.round(x.kelam / enc * 100) + '%"><span>' + (x.kelam || '') + '</span></i>' +
               '<i class="c2" style="height:' + Math.round(x.yoldas / enc * 100) + '%"></i></div><small>' + GUN[d.getDay()] + '</small></div>';
           }).join('') + '</div></div>' +
+        '<div class="ym-bolum">SUNUCU KOTASI · ÜCRETSİZ PLAN</div><div class="ym-kart ym-kota"><div class="cark"></div></div>' +
         '<div class="ym-bolum">HIZLI İŞLEMLER</div><div class="ym-hizli">' +
           '<button data-h="duyuru">' + ikon('bullhorn-outline') + '<span>Duyuru gönder</span></button>' +
           '<button data-h="sikayet">' + ikon('flag-outline') + '<span>Şikâyetler</span></button>' +
           '<button data-h="suffe">' + ikon('book-plus-outline') + '<span>Ders ekle</span></button>' +
           '<button data-h="temizle">' + ikon('broom') + '<span>Depo temizliği</span></button>' +
         '</div>';
+      kotaCiz(E.$('.ym-kota', ic));
       ic.onclick = function (ev) {
         var b = ev.target.closest('[data-h]');
         if (!b) return;

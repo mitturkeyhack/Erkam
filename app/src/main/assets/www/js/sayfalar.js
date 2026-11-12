@@ -480,7 +480,7 @@
         if (m.yukleme && m.yukleme.iptal) m.yukleme.iptal();
         if (m.tur === 'video') E.videoIptal(m.id);
       });
-      E.dosyaSil([].concat.apply([], medya.map(function (m) { return [m.yol, m.kapak]; })));
+      E.dosyaSil([].concat.apply([], medya.map(function (m) { return [m.yol, m.kapak, m.kucuk]; })));
     };
 
     function durum() {
@@ -560,8 +560,14 @@
         if (!m.onizleme) { m.onizleme = URL.createObjectURL(r.blob); medyaCiz(); }
         m.yol = E.yeniYol('foto', 'jpg');
         m.durum = 'yukleniyor'; medyaGuncelle(m);
-        m.yukleme = E.yukle(r.blob, m.yol, 'image/jpeg', function (y) { m.yuzde = y; medyaGuncelle(m); });
-        return m.yukleme;
+        var kb = r.kucuk;
+        m.yukleme = E.yukle(r.blob, m.yol, 'image/jpeg', function (y) { m.yuzde = Math.min(95, y); medyaGuncelle(m); });
+        return m.yukleme.then(function () {
+          if (!kb || medya.indexOf(m) < 0) return;
+          var ky = m.yol.replace(/\.jpg$/, '-k.jpg');
+          m.yukleme = E.yukle(kb, ky, 'image/jpeg');
+          return m.yukleme.then(function () { m.kucuk = ky; }, function (h) { if (h && h.message === 'iptal') throw h; /* önizleme olmasa da olur */ });
+        });
       }).then(function () {
         if (medya.indexOf(m) < 0) return;
         m.durum = 'tamam'; medyaGuncelle(m);
@@ -599,7 +605,7 @@
         if (!m) return;
         if (m.yukleme && m.yukleme.iptal) m.yukleme.iptal();
         if (m.tur === 'video') E.videoIptal(m.id);
-        E.dosyaSil([m.yol, m.kapak]);
+        E.dosyaSil([m.yol, m.kapak, m.kucuk]);
         medya.splice(medya.indexOf(m), 1);
         medyaCiz();
         return;
@@ -686,7 +692,7 @@
         adim('muhur', 'su', 'Mühür basılıyor');
         E.rpc('kelam_nakset', {
           p_icerik: alan.value.trim(), p_kategori: kategori, p_muhurler: muhurler, p_gorsel: null, p_ust: null, p_iktibas: iktibas ? iktibas.id : null,
-          p_medya: medya.map(function (m) { return { tur: m.tur, yol: m.yol, kapak: m.kapak || null, g: m.g || null, y: m.y || null, sure: m.sure || null }; })
+          p_medya: medya.map(function (m) { return { tur: m.tur, yol: m.yol, kapak: m.kapak || null, kucuk: m.kucuk || null, g: m.g || null, y: m.y || null, sure: m.sure || null }; })
         }).then(function (k) {
           naksedildi = true;
           adim('muhur', 't', 'Mühür basıldı');

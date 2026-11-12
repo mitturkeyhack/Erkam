@@ -1,0 +1,76 @@
+# Gecelik veritabanı yedeği — şifreli, 14 gün saklanır.
+# Gerekli depo sırları (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL : Supabase → Connect → "Session pooler" bağlantı adresi (şifre dahil)
+#   YEDEK_PAROLA    : yedeği şifreleyen uzun bir parola (kaybedilirse yedek açılamaz)
+# Açmak:  gpg --batch --passphrase "PAROLA" -d erkam-yedek.tar.gpg | tar x
+# Geri yüklemek: pg_restore --no-owner -d "BAGLANTI" public.dump  (ayrıntı: supabase/YEDEK.md)
+name: Veritabanı yedeği
+
+on:
+  schedule:
+    - cron: '17 0 * * *'   # her gece 03:17 (İstanbul)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-yedek
+  cancel-in-progress: false
+
+jobs:
+  yedek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Sırlar var mı
+        id: sir
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PAROLA: ${{ secrets.YEDEK_PAROLA }}
+        run: |
+          if [ -z "$DB" ] || [ -z "$PAROLA" ]; then
+            echo "::warning::SUPABASE_DB_URL ve YEDEK_PAROLA sırları eklenmemiş; yedek atlandı."
+            echo "var=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "var=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: PostgreSQL 17 istemcisi
+        if: steps.sir.outputs.var == '1'
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17 >/dev/null
+          /usr/lib/postgresql/17/bin/pg_dump --version
+
+      - name: Yedek al ve şifrele
+        if: steps.sir.outputs.var == '1'
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PAROLA: ${{ secrets.YEDEK_PAROLA }}
+        run: |
+          set -euo pipefail
+          PGD=/usr/lib/postgresql/17/bin/pg_dump
+          mkdir -p y && cd y
+          # uygulamanın tüm tabloları, işlevleri, verisi
+          $PGD "$DB" -Fc --no-owner --no-privileges -n public -f public.dump
+          # hesaplar ve dosya kayıtları (yalnızca veri)
+          $PGD "$DB" -Fc --no-owner --no-privileges --data-only -t auth.users -t auth.identities -f auth.dump
+          $PGD "$DB" -Fc --no-owner --no-privileges --data-only -t storage.objects -t storage.buckets -f storage.dump
+          date -u +%FT%TZ > zaman.txt
+          ls -la
+          tar cf - public.dump auth.dump storage.dump zaman.txt | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PAROLA" -o ../erkam-yedek.tar.gpg
+          cd .. && rm -rf y
+          echo "Şifreli yedek: $(du -h erkam-yedek.tar.gpg | cut -f1)"
+
+      - name: Yedeği sakla (14 gün)
+        if: steps.sir.outputs.var == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: erkam-yedek-${{ github.run_number }}
+          path: erkam-yedek.tar.gpg
+          retention-days: 14
+          if-no-files-found: error

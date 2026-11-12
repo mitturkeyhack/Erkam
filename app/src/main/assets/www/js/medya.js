@@ -45,7 +45,16 @@
         c.width = w; c.height = h;
         c.getContext('2d').drawImage(img, 0, 0, w, h);
         URL.revokeObjectURL(url);
-        c.toBlob(function (b) { b ? coz({ blob: b, g: w, y: h }) : red(new Error('Görsel işlenemedi.')); }, 'image/jpeg', 0.82);
+        c.toBlob(function (b) {
+          if (!b) return red(new Error('Görsel işlenemedi.'));
+          // akış önizlemesi: en uzun kenar 800 px (büyük hâli yalnızca açınca iner)
+          var ok = Math.min(1, 800 / Math.max(w, h));
+          if (ok >= 1) return coz({ blob: b, g: w, y: h, kucuk: null });
+          var k = document.createElement('canvas');
+          k.width = Math.max(1, Math.round(w * ok)); k.height = Math.max(1, Math.round(h * ok));
+          k.getContext('2d').drawImage(c, 0, 0, k.width, k.height);
+          k.toBlob(function (kb) { coz({ blob: b, g: w, y: h, kucuk: kb || null }); }, 'image/jpeg', 0.74);
+        }, 'image/jpeg', 0.82);
       };
       img.onerror = function () { URL.revokeObjectURL(url); red(new Error('Bu görsel açılamadı. Başka bir fotoğraf dene.')); };
       img.src = url;
@@ -63,6 +72,7 @@
         x.setRequestHeader('Authorization', 'Bearer ' + t);
         x.setRequestHeader('apikey', E.ayar.anahtar);
         x.setRequestHeader('Content-Type', tur);
+        x.setRequestHeader('cache-control', 'max-age=31536000');   // yollar benzersiz: dosya hiç değişmez
         x.upload.onprogress = function (o) { if (o.lengthComputable && ilerle) ilerle(Math.min(99, Math.round(o.loaded * 100 / o.total))); };
         x.onload = function () {
           if (x.status >= 200 && x.status < 300) { if (ilerle) ilerle(100); coz(yol); }
@@ -167,7 +177,7 @@
         '<span class="km-cizgi"><i></i></span></div>';
     }
     return '<div class="km km' + Math.min(m.length, 4) + '">' + m.map(function (x, i) {
-      return '<div class="km-k" data-is="medya-ac" data-km="' + k.id + '" data-i="' + i + '"><img src="' + esc(E.gorselUrl(x.yol)) + '" alt="" loading="lazy"></div>';
+      return '<div class="km-k" data-is="medya-ac" data-km="' + k.id + '" data-i="' + i + '"><img src="' + esc(E.gorselUrl(x.kucuk || x.yol)) + '" alt="" loading="lazy"></div>';
     }).join('') + '</div>';
   };
 

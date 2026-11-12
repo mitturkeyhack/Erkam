@@ -1454,3 +1454,18 @@ button.ist-s:active, button.ist-s.bekle { border-color: var(--vurgu); background
 .ist-oda textarea { width: 100%; resize: none; }
 .ist-oda .dgm { display: flex; gap: 10px; margin-top: 14px; }
 .ist-oda .dgm button { flex: 1; }
+
+/* ---------- Yönetim: sunucu kotası ---------- */
+.ym-kota { display: flex; flex-direction: column; gap: 14px; }
+.ym-kota-b { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
+.ym-kota-b svg { width: 20px; height: 20px; color: var(--vurgu); }
+.ym-kota-b b { margin-left: auto; font-size: 13.5px; }
+.ym-kota-c { height: 8px; border-radius: 5px; background: var(--kutu); overflow: hidden; margin: 7px 0 3px; }
+.ym-kota-c i { display: block; height: 100%; border-radius: 5px; background: var(--vurgu); }
+.ym-kota-s.yarim .ym-kota-c i { background: var(--uyari); }
+.ym-kota-s.dolu .ym-kota-c i { background: var(--tehlike); }
+.ym-kota-s small { color: var(--soluk2); font-size: 12px; }
+.ym-kota-uy { display: flex; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(239,68,68,.1); color: var(--tehlike); font-size: 13.5px; }
+.ym-kota-uy svg { width: 20px; height: 20px; flex: none; }
+.ym-kota-alt { display: flex; gap: 6px; color: var(--soluk); font-size: 12.5px; line-height: 1.45; }
+.ym-kota-alt svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }

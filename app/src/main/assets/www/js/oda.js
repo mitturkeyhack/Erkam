@@ -111,7 +111,7 @@
 
   // ---------- Oda sohbeti ----------
   E.odaSayfa = function (id, ozet) {
-    var veri = null, zamanlayici = null, kapandi = false, mesajlar = [];
+    var veri = null, zamanlayici = null, kapandi = false, mesajlar = [], kanal = null, canli = false, cekiliyor = false, sonCekim = 0;
     var tanim = {
       ad: 'oda', odaId: id,
       html: E.sayfaBasligi('<button class="ad oda-bas" data-is="oda-bilgi">' + odaAvatar(ozet || {}) + '<span>' + esc((ozet && ozet.ad) || 'Meclis Odası') + '<small>Meclis odası</small></span></button>',
@@ -124,8 +124,11 @@
           E.odaIstisare(function (soru, secenekler, saat) {
             return E.rpc('oda_mesaj_gonder', { p_oda: id, p_icerik: soru }).then(function (y) {
               return E.rpc('istisare_kur', { p_oda_mesaj: y.id, p_secenekler: secenekler, p_saat: saat }).then(function (i) {
-                y.istisare = i; mesajlar.push(y); ciz(true);
-              }, function (h) { mesajlar.push(y); ciz(true); E.tost('İstişare açılamadı: ' + E.hataMetni(h), 'kotu'); });
+                y.istisare = i;
+                var var_ = mesajlar.filter(function (m) { return m.id === y.id; })[0];
+                if (var_) var_.istisare = i; else ekle(y);
+                ciz(true);
+              }, function (h) { ekle(y); ciz(true); E.tost('İstişare açılamadı: ' + E.hataMetni(h), 'kotu'); });
             }).catch(function (h) { E.tost(E.hataMetni(h), 'kotu'); throw h; });
           });
         };
@@ -174,6 +177,49 @@
             if (ilk) ic.innerHTML = '<div class="bos-not">' + ikon('wifi-off') + esc(E.hataMetni(h)) + '</div>';
           });
         }
+        // yalnızca son mesajdan sonrakileri çek (Realtime haberi ya da yedek yoklama)
+        function ekle(y) {
+          if (!y || mesajlar.some(function (m) { return m.id === y.id; })) return false;
+          mesajlar.push(y); return true;
+        }
+        function yeniCek() {
+          if (kapandi || cekiliyor) return Promise.resolve();
+          cekiliyor = true; sonCekim = Date.now();
+          var son = mesajlar.length ? mesajlar[mesajlar.length - 1].id : 0;
+          return E.rpc('oda_yeni', { p_oda: id, p_sonra: son }).then(function (l) {
+            cekiliyor = false;
+            if (kapandi || !l || !l.length) return;
+            var sistem = false, oldu = false;
+            l.forEach(function (m) { if (ekle(m)) oldu = true; if (m.tur === 'sistem') sistem = true; });
+            if (sistem) return yukle(false);   // üye ya da ad değişmiş olabilir
+            if (oldu) ciz(true);
+          }, function (h) {
+            cekiliyor = false;
+            if (String(h && h.message).indexOf('oda_yok') !== -1) { kapandi = true; E.tost('Bu odada artık değilsin.', 'kotu'); E.sayfaKapat(); }
+          });
+        }
+        function abone() {
+          if (!E.sb || !E.sb.channel) return;
+          var kur = function () {
+            if (kapandi) return;
+            kanal = E.sb.channel('oda:' + id, { config: { private: true } })
+              .on('broadcast', { event: 'mesaj' }, function () { yeniCek(); })
+              .on('broadcast', { event: 'oy' }, function (o) {
+                var ist = o && o.payload && o.payload.istisare;
+                if (!ist) return;
+                E.rpc('istisare_json', { p_id: ist }).then(function (y) { if (y && !kapandi) E.istisareGuncelle(y); }, function () { /* önemsiz */ });
+              })
+              .subscribe(function (durum) {
+                var once = canli;
+                canli = durum === 'SUBSCRIBED';
+                if (canli && !once) yeniCek();   // bağlanana kadar kaçan olduysa
+              });
+          };
+          try {
+            var r = E.sb.realtime && E.sb.realtime.setAuth ? E.sb.realtime.setAuth() : null;
+            if (r && r.then) r.then(kur, kur); else kur();
+          } catch (e) { kur(); }
+        }
         tanim.yenile = function () { return yukle(false); };
         alan.oninput = function () {
           dgm.disabled = !alan.value.trim();
@@ -185,15 +231,23 @@
           dgm.disabled = true;
           E.rpc('oda_mesaj_gonder', { p_oda: id, p_icerik: m }).then(function (y) {
             alan.value = ''; alan.style.height = 'auto';
-            mesajlar.push(y); ciz(true);
+            ekle(y); ciz(true);
           }).catch(function (h) { dgm.disabled = false; E.tost(E.hataMetni(h), 'kotu'); });
         };
-        yukle(true);
-        zamanlayici = setInterval(function () { if (!document.hidden) yukle(false); }, 5000);
+        yukle(true).then(abone);
+        // yedek yoklama: canlı bağlantı varsa dakikada bir, yoksa 8 saniyede bir — yalnızca yeni mesajlar
+        zamanlayici = setInterval(function () {
+          if (document.hidden || kapandi) return;
+          if (Date.now() - sonCekim >= (canli ? 60000 : 8000)) yeniCek();
+        }, 4000);
+        tanim._gorunur = function () { if (!document.hidden) yeniCek(); };
+        document.addEventListener('visibilitychange', tanim._gorunur);
       },
       kapaninca: function () {
         kapandi = true;
         clearInterval(zamanlayici);
+        if (tanim._gorunur) document.removeEventListener('visibilitychange', tanim._gorunur);
+        if (kanal && E.sb && E.sb.removeChannel) { try { E.sb.removeChannel(kanal); } catch (e) { /* önemsiz */ } kanal = null; }
         E._istisareDinle = null;
         E.veri.odalar = null;
         if (E.ekran === 'mesajlar' && E._mesajCiz) E._mesajCiz();
