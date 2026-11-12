@@ -95,6 +95,26 @@
     if (!yollar.length) return Promise.resolve();
     return E.sb.storage.from('gorseller').remove(yollar).catch(function () { /* önemsiz */ });
   };
+  // hesap silinirken: kişinin klasöründeki tüm dosyalar (fotoğraf, video, kapak, avatar)
+  E.dosyalarimiSil = function () {
+    if (!E.sb || !E.ben || !E.ben.id) return Promise.resolve();
+    var kova = E.sb.storage.from('gorseller'), kok = E.ben.id, hepsi = [];
+    function tara(klasor, derinlik) {
+      return kova.list(klasor, { limit: 1000 }).then(function (r) {
+        var alt = [];
+        (r.data || []).forEach(function (o) {
+          var yol = klasor + '/' + o.name;
+          if (o.id) hepsi.push(yol); else if (derinlik < 2) alt.push(tara(yol, derinlik + 1));
+        });
+        return Promise.all(alt);
+      });
+    }
+    return tara(kok, 0).then(function () {
+      var parcalar = [];
+      for (var i = 0; i < hepsi.length; i += 100) parcalar.push(kova.remove(hepsi.slice(i, i + 100)));
+      return Promise.all(parcalar);
+    }).catch(function () { /* silme yine de devam etsin */ });
+  };
   E.yeniYol = function (ad, uzanti) {
     return E.ben.id + '/' + ad + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) + '.' + uzanti;
   };

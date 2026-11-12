@@ -493,7 +493,7 @@
   E.is['hesap-sil'] = function () {
     return E.sor('Hesabımı Sil', 'Künyen, kelamların, mesajların ve heyben kalıcı olarak silinir. Bu işlem geri alınamaz.', 'Kalıcı Olarak Sil', true).then(function (evet) {
       if (!evet) return;
-      return E.rpc('hesabimi_sil').then(function () {
+      return E.dosyalarimiSil().then(function () { return E.rpc('hesabimi_sil'); }).then(function () {
         E.tost('Hesabın silindi. Yolun açık olsun yoldaş.');
         return E.cikisYap();
       });

@@ -288,7 +288,7 @@
       sahne.innerHTML = '<div class="emn-tamam kucuk">' + ikon('account-child-outline') + '<h2>Biraz daha büyümelisin</h2>' +
         '<p>Kanun gereği 15 yaşını doldurmamış kişiler sosyal ağlara üye olamaz. Hesabın silindi; 15 yaşına girdiğinde seni meclisimizde görmekten mutluluk duyarız.</p></div>';
       E.$('.emn-alt', kok).innerHTML = '<button class="emn-ileri son" id="em-cik">Tamam</button>';
-      E.rpc('hesabimi_sil').catch(function () {}).then(function () {
+      E.dosyalarimiSil().then(function () { return E.rpc('hesabimi_sil'); }).catch(function () {}).then(function () {
         E.$('#em-cik', kok).onclick = function () { kapat(); E.cikisYap(); };
       });
     }
