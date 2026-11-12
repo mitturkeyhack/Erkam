@@ -415,16 +415,24 @@
       '<div class="nesir-ic"><div class="nk">' +
         '<div class="nk-bas">' + E.avatar(ben) + '<div><b>' + esc(ben.isim || 'Yoldaş') + E.rozetVar(ben) + '</b><small>@' + esc(ben.kunye || '') + '</small></div></div>' +
         '<textarea rows="3" maxlength="600" placeholder="' + (iktibas ? 'Bu kelama sözünü ekle...' : 'Meclise ne nakşetmek istersin?') + '"></textarea>' +
-        '<div class="oz"></div>' + (iktibas ? '<div class="nk-iktibas">' + E.iktibasHtml(iktibas) + '</div>' : '') +
+        '<div class="oz"></div><div class="nk-ist"></div>' + (iktibas ? '<div class="nk-iktibas">' + E.iktibasHtml(iktibas) + '</div>' : '') +
         '<div class="nk-muhur"><span class="nk-cipler"></span><label class="nk-ekle">' + ikon('pound') + '<input placeholder="mühür ekle" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="31"></label></div>' +
         '<div class="nk-oneri"></div>' +
       '</div></div>' +
       '<div class="araclar"><button data-a="foto" aria-label="Fotoğraf ekle">' + ikon('image-plus') + '</button>' +
       '<button data-a="video" aria-label="Video ekle">' + ikon('video-plus') + '</button>' +
+      '<button data-a="anket" aria-label="İstişare ekle">' + ikon('poll') + '</button>' +
       '<span class="say"><i></i><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15"></circle><circle class="d" cx="18" cy="18" r="15"></circle></svg></span></div>', 'nesir');
     var alan = E.$('textarea', n), gonder = E.$('.gonder', n), say = E.$('.say', n), oz = E.$('.oz', n),
       muhur = E.$('.nk-ekle input', n), mcip = E.$('.nk-cipler', n), oneri = E.$('.nk-oneri', n),
-      btnFoto = E.$('[data-a="foto"]', n), btnVideo = E.$('[data-a="video"]', n);
+      btnFoto = E.$('[data-a="foto"]', n), btnVideo = E.$('[data-a="video"]', n), btnAnket = E.$('[data-a="anket"]', n);
+    var anket = null, anketKap = E.$('.nk-ist', n);
+    function anketAc() {
+      anket = E.istisareDuzenleyici(anketKap, function () { durum(); });
+      anket.kaldirinca = function () { anket = null; anketKap.innerHTML = ''; durum(); };
+      alan.placeholder = 'Meclise ne soruyorsun?';
+      durum();
+    }
 
     // ---- mühürler: # rozetleri ----
     function muhurTemiz(m) { return (m || '').toLocaleLowerCase('tr').replace(/[^a-z0-9çğıöşü_]/g, '').slice(0, 30); }
@@ -480,10 +488,12 @@
       E.$('.d', say).style.strokeDashoffset = (94.25 * (1 - o)).toFixed(2);
       say.className = 'say' + (u > 500 ? ' fazla' : u >= 440 ? ' yakin' : '') + (u ? ' gor' : '');
       E.$('i', say).textContent = u >= 440 ? String(500 - u) : '';
-      gonder.disabled = mesgul || u > 500 || (u < 1 && !medya.length) || medya.some(function (m) { return m.durum === 'hata'; });
+      gonder.disabled = mesgul || u > 500 || (u < 1 && !medya.length) || medya.some(function (m) { return m.durum === 'hata'; }) ||
+        (anket && (u < 1 || !anket.gecerli()));
       var video = medya.some(function (m) { return m.tur === 'video'; });
-      btnFoto.disabled = video || medya.length >= E.FOTO_EN;
-      btnVideo.disabled = medya.length > 0;
+      btnFoto.disabled = !!anket || video || medya.length >= E.FOTO_EN;
+      btnVideo.disabled = !!anket || medya.length > 0;
+      btnAnket.disabled = !!anket || medya.length > 0;
     }
     function boyla() { alan.style.height = 'auto'; alan.style.height = Math.max(84, alan.scrollHeight) + 'px'; }
 
@@ -618,6 +628,8 @@
         });
       } else if (a === 'video') {
         videoEkle();
+      } else if (a === 'anket') {
+        anketAc();
       }
     };
 
@@ -636,6 +648,7 @@
       if (video) adimlar.push('video');
       if (medya.length) adimlar.push('yukle');
       adimlar.push('muhur');
+      if (anket) adimlar.push('anket');
       ek.innerHTML = '<div class="naks-halka" style="--p:0%">' + ikon('star-crescent') + '</div><h3>Kelamın nakşediliyor</h3>' +
         '<div class="naks-adim">' + adimlar.map(function (a) { return '<div data-adim="' + a + '"></div>'; }).join('') + '</div><div class="naks-alt"></div>';
       var halkaEl = E.$('.naks-halka', ek), basamak = 0;
@@ -643,7 +656,7 @@
         var el = E.$('[data-adim="' + ad + '"]', ek);
         if (!el) return;
         el.className = hal;
-        el.innerHTML = ikon(hal === 't' ? 'check-circle' : hal === 'su' ? 'rotate-right' : ad === 'muhur' ? 'pound' : 'clock-outline') + '<span>' + esc(metin) + '</span>';
+        el.innerHTML = ikon(hal === 't' ? 'check-circle' : hal === 'su' ? 'rotate-right' : ad === 'muhur' ? 'pound' : ad === 'anket' ? 'poll' : 'clock-outline') + '<span>' + esc(metin) + '</span>';
       }
       function ciz() {
         var tamamlanan = medya.length ? medya.reduce(function (s, m) { return s + genel(m); }, 0) / medya.length : 100;
@@ -656,6 +669,7 @@
         }
         if (medya.length) adim('yukle', tamamlanan >= 100 ? 't' : 'su', tamamlanan >= 100 ? 'Yüklendi' : 'Yükleniyor %' + Math.round(tamamlanan));
         if (basamak === 0) adim('muhur', '', 'Mühür basılacak');
+        if (basamak === 0 && anket) adim('anket', '', 'İstişare açılacak');
         halkaEl.style.setProperty('--p', Math.round((medya.length ? tamamlanan * 0.85 : 40)) + '%');
         return tamamlanan;
       }
@@ -676,6 +690,12 @@
         }).then(function (k) {
           naksedildi = true;
           adim('muhur', 't', 'Mühür basıldı');
+          if (!anket) return k;
+          adim('anket', 'su', 'İstişare açılıyor');
+          return E.rpc('istisare_kur', { p_kelam: k.id, p_secenekler: anket.secenekler(), p_saat: anket.saat() }).then(function (i) {
+            k.istisare = i; adim('anket', 't', 'İstişare açıldı'); return k;
+          }, function (h) { E.tost('Kelam neşredildi ama istişare açılamadı: ' + E.hataMetni(h), 'kotu'); return k; });
+        }).then(function (k) {
           halkaEl.style.setProperty('--p', '100%');
           halkaEl.classList.add('bas');
           E.$('h3', ek).textContent = 'Kelamın nakşedildi';

@@ -117,9 +117,21 @@
       html: E.sayfaBasligi('<button class="ad oda-bas" data-is="oda-bilgi">' + odaAvatar(ozet || {}) + '<span>' + esc((ozet && ozet.ad) || 'Meclis Odası') + '<small>Meclis odası</small></span></button>',
           '<button class="ikb" data-is="oda-bilgi" aria-label="Oda bilgisi">' + ikon('information-outline') + '</button>') +
         '<div class="ic"><div class="yukleniyor"><div class="cark"></div></div></div>' +
-        '<div class="yaz"><textarea rows="1" maxlength="2000" placeholder="Meclise kelamını söyle..."></textarea><button aria-label="Gönder" disabled>' + ikon('send') + '</button></div>',
+        '<div class="yaz"><button class="yaz-ist" aria-label="İstişare aç">' + ikon('poll') + '</button><textarea rows="1" maxlength="2000" placeholder="Meclise kelamını söyle..."></textarea><button aria-label="Gönder" disabled>' + ikon('send') + '</button></div>',
       kur: function (el) {
-        var ic = E.$('.ic', el), alan = E.$('.yaz textarea', el), dgm = E.$('.yaz button', el);
+        var ic = E.$('.ic', el), alan = E.$('.yaz textarea', el), dgm = E.$('.yaz button:last-child', el);
+        E.$('.yaz-ist', el).onclick = function () {
+          E.odaIstisare(function (soru, secenekler, saat) {
+            return E.rpc('oda_mesaj_gonder', { p_oda: id, p_icerik: soru }).then(function (y) {
+              return E.rpc('istisare_kur', { p_oda_mesaj: y.id, p_secenekler: secenekler, p_saat: saat }).then(function (i) {
+                y.istisare = i; mesajlar.push(y); ciz(true);
+              }, function (h) { mesajlar.push(y); ciz(true); E.tost('İstişare açılamadı: ' + E.hataMetni(h), 'kotu'); });
+            }).catch(function (h) { E.tost(E.hataMetni(h), 'kotu'); throw h; });
+          });
+        };
+        E._istisareDinle = function (yeni) {
+          mesajlar.forEach(function (m) { if (m.istisare && m.istisare.id === yeni.id) m.istisare = yeni; });
+        };
         function basCiz() {
           var o = veri.oda, b = E.$('.oda-bas', el);
           if (b) b.innerHTML = odaAvatar({ uyeler: (veri.uyeler || []).filter(function (k) { return k.id !== E.ben.id; }) }) +
@@ -134,9 +146,12 @@
             if (m.tur === 'sistem') { h += '<div class="oda-sis">' + esc(m.icerik) + '</div>'; sonKisi = null; return; }
             var k = m.kisi || {}, yeniKisi = sonKisi !== k.id;
             sonKisi = k.id;
-            if (m.benden) h += '<div class="balon ben">' + esc(m.icerik) + '<small>' + E.saat(m.olusturma) + '</small></div>';
+            var ist = m.istisare ? '<span class="ist-soru">' + ikon('poll') + '</span>' : '';
+            var govde = ist + esc(m.icerik) + (m.istisare ? E.istisareHtml(m.istisare) : '');
+            var ak = m.istisare ? ' anketli' : '';
+            if (m.benden) h += '<div class="balon ben' + ak + '">' + govde + '<small>' + E.saat(m.olusturma) + '</small></div>';
             else h += '<div class="oda-m' + (yeniKisi ? ' ilk' : '') + '">' + (yeniKisi ? '<button class="oda-mav" data-is="yoldas" data-kunye="' + esc(k.kunye || '') + '">' + E.avatar(k) + '</button>' : '<span class="oda-mav"></span>') +
-              '<div class="balon onlar">' + (yeniKisi ? '<b class="oda-ki">' + esc(k.isim || 'Ayrılan yoldaş') + '</b>' : '') + esc(m.icerik) + '<small>' + E.saat(m.olusturma) + '</small></div></div>';
+              '<div class="balon onlar' + ak + '">' + (yeniKisi ? '<b class="oda-ki">' + esc(k.isim || 'Ayrılan yoldaş') + '</b>' : '') + govde + '<small>' + E.saat(m.olusturma) + '</small></div></div>';
           });
           var dipte = ic.scrollHeight - ic.scrollTop - ic.clientHeight < 80;
           ic.innerHTML = '<div class="balonlar">' + h + '</div>';
@@ -147,10 +162,13 @@
             if (kapandi || !d) return;
             veri = d; tanim.veri = d;
             var eski = mesajlar.length ? mesajlar[mesajlar.length - 1].id : 0;
+            var imza = function (l) { return l.map(function (m) { return m.istisare ? m.istisare.toplam + ':' + m.istisare.benim : ''; }).join(','); };
+            var eskiImza = imza(mesajlar);
             mesajlar = d.mesajlar || [];
             var yeni = mesajlar.length ? mesajlar[mesajlar.length - 1].id : 0;
             basCiz();
             if (ilk || yeni !== eski) ciz(ilk || yeni !== eski);
+            else if (imza(mesajlar) !== eskiImza) ciz(false);
           }).catch(function (h) {
             if (String(h && h.message).indexOf('oda_yok') !== -1) { kapandi = true; clearInterval(zamanlayici); E.tost('Bu odada artık değilsin.', 'kotu'); E.sayfaKapat(); return; }
             if (ilk) ic.innerHTML = '<div class="bos-not">' + ikon('wifi-off') + esc(E.hataMetni(h)) + '</div>';
@@ -176,6 +194,7 @@
       kapaninca: function () {
         kapandi = true;
         clearInterval(zamanlayici);
+        E._istisareDinle = null;
         E.veri.odalar = null;
         if (E.ekran === 'mesajlar' && E._mesajCiz) E._mesajCiz();
         E.beniYenile();

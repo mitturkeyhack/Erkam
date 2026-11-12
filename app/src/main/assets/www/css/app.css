@@ -1394,3 +1394,63 @@ body.emn-acik #tost { z-index: 90; }
 .kelam .bas .bas-menu svg { width: 21px; height: 21px; }
 .kelam .bas .bas-menu:active { background: var(--kutu); }
 .kelam.cevap .alt-satir { justify-content: flex-start; }
+
+/* ---------- İstişare (anket) — hilal mühürlü ---------- */
+.istisare { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; white-space: normal; }
+.ist-s { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; column-gap: 10px; row-gap: 6px; width: 100%;
+  text-align: left; font-size: 15.5px; color: var(--yazi); }
+button.ist-s { padding: 11px 14px; border: 1.5px solid var(--cizgi); border-radius: 14px; background: var(--kart); }
+button.ist-s:active, button.ist-s.bekle { border-color: var(--vurgu); background: var(--kutu); }
+.ist-rd { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--soluk2); display: flex; align-items: center;
+  justify-content: center; flex: none; }
+.ist-rd svg { width: 14px; height: 14px; fill: #fff; }
+.ist-s.sec .ist-rd { background: var(--vurgu); border-color: var(--vurgu); }
+.ist-s.sec .ist-et { font-weight: 800; color: var(--vurgu); }
+.ist-s b { font-size: 15px; font-weight: 800; }
+.ist-s.onde b { color: var(--vurgu); }
+.ist-cz { grid-column: 2 / 4; height: 6px; border-radius: 4px; background: var(--kutu); overflow: hidden; }
+.ist-cz i { display: block; height: 100%; border-radius: 4px; background: var(--vurgu); opacity: 0.55; transition: width 0.5s ease; }
+.ist-s.sec .ist-cz i, .ist-s.onde .ist-cz i { opacity: 1; }
+.ist-alt { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; color: var(--soluk2); font-size: 13px; }
+.ist-alt svg { width: 15px; height: 15px; }
+.ist-alt span { color: var(--soluk); }
+/* düzenleyici */
+.nk-ist:empty { display: none; }
+.ist-d { margin-top: 12px; border: 1px solid var(--cizgi); border-radius: 18px; padding: 12px 14px; }
+.ist-d-b { display: flex; align-items: center; gap: 8px; color: var(--vurgu); margin-bottom: 10px; }
+.ist-d-b svg { width: 20px; height: 20px; }
+.ist-d-x { margin-left: auto; color: var(--tehlike); font-weight: 700; font-size: 14px; }
+.ist-d-l { display: flex; flex-direction: column; gap: 8px; }
+.ist-d-s { display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--cizgi); border-radius: 14px; padding: 0 12px; background: var(--kart); }
+.ist-d-s:focus-within { border-color: var(--vurgu); }
+.ist-d-s input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; padding: 12px 0; font-size: 15.5px; color: var(--yazi); }
+.ist-d-ekle { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding: 10px 12px; width: 100%; border: 1.5px dashed var(--cizgi);
+  border-radius: 14px; color: var(--vurgu); font-weight: 700; font-size: 14.5px; }
+.ist-d-ekle svg { width: 18px; height: 18px; }
+.ist-d-sure { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--soluk); font-size: 14px; }
+.ist-d-sure span { margin-right: auto; }
+.ist-d-sure button { padding: 6px 12px; border-radius: 12px; background: var(--kutu); font-weight: 700; font-size: 13.5px; color: var(--yazi2); }
+.ist-d-sure button.acik { background: var(--vurgu); color: #fff; }
+.nesir .araclar button:disabled { opacity: 0.35; }
+/* meclis odası */
+.yaz .yaz-ist { background: var(--kart); color: var(--vurgu); border: 1px solid var(--cizgi); }
+.yaz .yaz-ist svg { width: 24px; height: 24px; }
+.balon.anketli { min-width: 250px; }
+.balon .ist-soru { display: inline-flex; vertical-align: -4px; margin-right: 5px; }
+.balon .ist-soru svg { width: 19px; height: 19px; }
+.balon.onlar .ist-soru { color: var(--vurgu); }
+.balon .istisare { gap: 8px; margin-top: 10px; }
+.balon button.ist-s { padding: 9px 12px; font-size: 14.5px; }
+.balon.ben .ist-s, .balon.ben .ist-s.sec .ist-et, .balon.ben .ist-alt, .balon.ben .ist-alt span { color: #fff; }
+.balon.ben button.ist-s { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.35); }
+.balon.ben .ist-rd { border-color: rgba(255,255,255,0.7); }
+.balon.ben .ist-s.sec .ist-rd { background: #fff; border-color: #fff; }
+.balon.ben .ist-s.sec .ist-rd svg { fill: var(--vurgu-koyu); }
+.balon.ben .ist-cz { background: rgba(255,255,255,0.2); }
+.balon.ben .ist-cz i { background: #fff; }
+.ist-oda { padding: 4px 18px 18px; }
+.ist-oda h3 { display: flex; align-items: center; gap: 8px; margin: 6px 0 12px; font-size: 19px; }
+.ist-oda h3 svg { width: 22px; height: 22px; color: var(--vurgu); }
+.ist-oda textarea { width: 100%; resize: none; }
+.ist-oda .dgm { display: flex; gap: 10px; margin-top: 14px; }
+.ist-oda .dgm button { flex: 1; }

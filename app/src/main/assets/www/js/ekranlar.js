@@ -35,6 +35,7 @@
       '<div class="metin"' + (o.acik ? '' : ' data-is="kelam-ac" data-id="' + k.id + '"') + '>' + E.metinHtml(k.icerik) + '</div>';
     h += E.medyaHtml(k);
     if (k.iktibas) h += E.iktibasHtml(k.iktibas);
+    if (k.istisare && E.istisareHtml) h += E.istisareHtml(k.istisare);
     if ((o.muhurlu || o.acik) && k.muhurler && k.muhurler.length) {
       h += '<div class="muhurler">' + k.muhurler.map(function (m) {
         return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m) + '">' + ikon('pound') + esc(m) + '</button>';
