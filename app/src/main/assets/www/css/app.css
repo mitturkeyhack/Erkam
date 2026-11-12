@@ -1456,6 +1456,12 @@ button.ist-s:active, button.ist-s.bekle { border-color: var(--vurgu); background
 .ist-oda .dgm button { flex: 1; }
 
 /* ---------- Yönetim: sunucu kotası ---------- */
+.ym-yedek { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 14px; background: rgba(16,185,129,.1); color: var(--vurgu); }
+.ym-yedek svg { width: 24px; height: 24px; flex: none; }
+.ym-yedek span { display: flex; flex-direction: column; gap: 2px; }
+.ym-yedek b { font-size: 14.5px; }
+.ym-yedek small { color: var(--soluk); font-size: 12.5px; line-height: 1.4; }
+.ym-yedek.kotu { background: rgba(239,68,68,.1); color: var(--tehlike); }
 .ym-kota { display: flex; flex-direction: column; gap: 14px; }
 .ym-kota-b { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
 .ym-kota-b svg { width: 20px; height: 20px; color: var(--vurgu); }

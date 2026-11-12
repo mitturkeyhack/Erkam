@@ -73,7 +73,18 @@
         ['account-clock-outline', 'Aylık aktif yoldaş', k.aylik_aktif, k.aylik_aktif_sinir, function (n) { return String(n); }]
       ];
       var uyari = l.filter(function (x) { return x[2] / x[3] >= 0.8; });
-      kap.innerHTML = (uyari.length ? '<div class="ym-kota-uy">' + ikon('alert') + '<span><b>' + uyari.map(function (x) { return x[1]; }).join(', ') +
+      var y = k.son_yedek, yHtml;
+      if (!y) yHtml = '<div class="ym-yedek kotu">' + ikon('database-off-outline') + '<span><b>Henüz yedek yok</b><small>GitHub\'daki "Veritabanı yedeği" iş akışı hiç başarıyla çalışmadı.</small></span></div>';
+      else {
+        var saat = (Date.now() - new Date(y.zaman).getTime()) / 36e5;
+        var iyi = y.ok && saat < 36;
+        var ne = new Date(y.zaman).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        yHtml = '<div class="ym-yedek' + (iyi ? '' : ' kotu') + '">' + ikon(iyi ? 'shield-check-outline' : 'database-alert-outline') + '<span><b>' +
+          (!y.ok ? 'Son yedek başarısız oldu' : iyi ? 'Yedek düzenli alınıyor' : 'Yedek gecikti') + '</b><small>' +
+          (y.ok ? 'Son yedek: ' : 'Deneme: ') + esc(ne) + (y.ok ? ' · ' + boyut(y.boyut || 0) : '') + ' · #' + esc(String(y.calisma || '')) +
+          (iyi ? '' : ' — GitHub → Actions → Veritabanı yedeği sayfasına bak.') + '</small></span></div>';
+      }
+      kap.innerHTML = yHtml + (uyari.length ? '<div class="ym-kota-uy">' + ikon('alert') + '<span><b>' + uyari.map(function (x) { return x[1]; }).join(', ') +
           '</b> sınırın %80\'ini geçti. Pro plana geçmeyi ya da temizlik yapmayı düşün.</span></div>' : '') +
         l.map(function (x) {
           var o = Math.min(100, x[2] * 100 / x[3]);

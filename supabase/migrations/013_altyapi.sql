@@ -92,6 +92,7 @@ begin
     'gunluk_aktif', (select count(distinct user_id) from auth.sessions where updated_at > now() - interval '1 day'),
     'kelam', (select count(*) from public.kelamlar),
     'oda_mesaj', (select count(*) from public.oda_mesajlari),
+    'son_yedek', (select deger from public.uygulama_ayar where ad = 'son_yedek'),  -- yedek.yml yazar
     'olcum', now());
 end $$;
 

@@ -74,3 +74,17 @@ jobs:
           path: erkam-yedek.tar.gpg
           retention-days: 14
           if-no-files-found: error
+
+      - name: Sonucu uygulamaya yaz (Yönetim Merkezi'nde görünür)
+        if: always() && steps.sir.outputs.var == '1'
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          SONUC: ${{ job.status }}
+        run: |
+          BOYUT=$(stat -c %s erkam-yedek.tar.gpg 2>/dev/null || echo 0)
+          OK=$([ "$SONUC" = "success" ] && echo true || echo false)
+          /usr/lib/postgresql/17/bin/psql "$DB" -v ON_ERROR_STOP=1 -q <<SQL
+          with d as (select jsonb_build_object('zaman', now(), 'ok', $OK, 'boyut', $BOYUT, 'calisma', ${{ github.run_number }}) as v),
+               u as (update public.uygulama_ayar set deger = (select v from d) where ad = 'son_yedek' returning 1)
+          insert into public.uygulama_ayar (ad, deger) select 'son_yedek', (select v from d) where not exists (select 1 from u);
+          SQL
