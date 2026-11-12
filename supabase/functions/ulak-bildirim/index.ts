@@ -58,6 +58,9 @@ function metinler(v: any): { baslik: string; govde: string; hedef: string; grup:
     case "yoldas": return { baslik: "Yeni yoldaş", govde: kim + " (@" + v.kunye + ") seni yoldaş edindi.", hedef: "profil:" + v.kunye, grup: "yoldas" };
     case "istek": return { baslik: "Yoldaşlık isteği", govde: kim + " (@" + v.kunye + ") yoldaşın olmak istiyor.", hedef: "profil:" + v.kunye, grup: "yoldas" };
     case "kabul": return { baslik: "İstek tasdiklendi", govde: kim + " (@" + v.kunye + ") yoldaşlık isteğini kabul etti.", hedef: "profil:" + v.kunye, grup: "yoldas" };
+    case "nakil": return { baslik: kim + " kelamını nakletti", govde: km || "Kelamın yoldaşlara nakledildi.", hedef: "kelam:" + v.kelam, grup: "kelam-" + v.kelam };
+    case "iktibas": return { baslik: kim + " kelamını iktibas etti", govde: km || "Kelamın iktibas edildi.", hedef: "kelam:" + v.kelam, grup: "kelam-" + v.kelam };
+    case "oda": return { baslik: v.oda_ad || "Meclis odası", govde: (v.isim ? v.isim + ": " : "") + (v.metin || "Yeni mesaj"), hedef: "oda:" + v.oda, grup: "oda-" + v.oda };
     case "duyuru": return { baslik: "📣 ERKAM Duyurusu", govde: v.metin || "Meclisten yeni bir duyuru var.", hedef: "", grup: "duyuru" };
     case "uyari": return { baslik: "Yönetimden bildirim", govde: v.metin || "Hesabınla ilgili bir gelişme var.", hedef: "", grup: "uyari" };
     default: return { baslik: "ERKAM", govde: "Mecliste yeni bir gelişme var.", hedef: "", grup: "genel" };
@@ -68,7 +71,7 @@ Deno.serve(async (req) => {
   try {
     if (req.method !== "POST") return new Response("yok", { status: 405 });
     const { tur, id } = await req.json();
-    if ((tur !== "bildirim" && tur !== "mesaj") || !Number.isInteger(id)) return new Response("gecersiz", { status: 400 });
+    if ((tur !== "bildirim" && tur !== "mesaj" && tur !== "oda") || !Number.isInteger(id)) return new Response("gecersiz", { status: 400 });
     // ulak_icerik her kaydı yalnızca bir kez ve sadece taze iken verir; başkası çağırsa da sahte bildirim gidemez
     const h = hizmetAl();
     const { data: v, error } = await db.rpc("ulak_icerik", { p_tur: tur, p_id: id });
@@ -91,7 +94,7 @@ Deno.serve(async (req) => {
             android: {
               priority: "HIGH", ttl: "86400s",
               notification: {
-                channel_id: String(v.tur) === "mesaj" ? "mesaj" : "meclis",
+                channel_id: String(v.tur) === "mesaj" || String(v.tur) === "oda" ? "mesaj" : "meclis",
                 icon: "ic_bildirim", color: "#059669", tag: m.grup, sound: "default",
                 default_vibrate_timings: true, notification_priority: "PRIORITY_HIGH",
               },

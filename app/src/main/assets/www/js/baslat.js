@@ -306,8 +306,9 @@
       E.ben = b;
       E.$('#acilis').hidden = true;
       if (b.uzak) { uzakEkrani(); return; }
-      if (E.emanetGerekli && E.emanetGerekli()) { E.emanetSihirbaz(meclisiAc); return; }
-      meclisiAc();
+      var ilerle = function () { if (E.emanetGerekli && E.emanetGerekli()) { E.emanetSihirbaz(meclisiAc); return; } meclisiAc(); };
+      if (b.uzlet && E.uzletEkrani) { E.uzletEkrani(ilerle); return; }
+      ilerle();
     }).catch(function (h) {
       E.$('#acilis').hidden = true;
       if (/giris_gerekli|JWT|token|401/i.test(String(h && h.message))) { E.cikisYap(); return; }
@@ -493,6 +494,7 @@
     if (!d || d === 'null') return;
     if (tur === 'kelam') E.kelamSayfa(d);
     else if (tur === 'profil') E.yoldasSayfa(d);
+    else if (tur === 'oda') E.odaSayfa(d);
     else if (tur === 'sohbet') {
       E.rpc('profil_getir', { p_kunye: d }).then(function (p) {
         if (p) E.sohbetSayfa(p.profil || p);

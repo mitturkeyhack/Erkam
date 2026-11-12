@@ -53,6 +53,15 @@
   function kelamMenu(id, yazarId, ustSayfa) {
     var benim = E.ben && yazarId === E.ben.id, yonetim = E.ben && E.ben.rol === 'yonetim';
     var h = '<div class="yi" style="padding:10px 0 16px">';
+    var kv = (E._kelamVeri || {})[id] || (ustSayfa && E.yigin.length && E.yigin[E.yigin.length - 1].veri ? E.yigin[E.yigin.length - 1].veri.kelam : null);
+    if (benim && kv) {
+      var kalan = 15 - Math.floor((Date.now() - new Date(kv.olusturma).getTime()) / 60000);
+      if (kalan > 0) h += '<button class="secenek" data-is="kelam-tadil" data-id="' + id + '">' + ikon('file-document-edit-outline') + 'Tadil Et<small>' + kalan + ' dk kaldı</small></button>';
+      if (!kv.ust_id) {
+        var seckin = E.ben && E.ben.seckin && E.ben.seckin.id === id;
+        h += '<button class="secenek" data-is="kelam-seckin" data-id="' + id + '">' + ikon(seckin ? 'bookmark-off-outline' : 'bookmark-outline') + (seckin ? 'Seçkinden Kaldır' : 'Seçkin Yap') + '<small>Profilinin en üstünde durur</small></button>';
+      }
+    }
     if (benim || yonetim) h += '<button class="secenek kirmizi" data-is="kelam-sil" data-id="' + id + '" data-ust="' + (ustSayfa ? 1 : 0) + '">' + ikon('delete-outline') + (benim ? 'Kelamı Sil' : 'Kelamı Kaldır (Yönetim)') + '</button>';
     if (!benim) h += '<button class="secenek" data-is="kelam-sikayet" data-id="' + id + '">' + ikon('flag-outline') + 'Şikâyet Et</button>';
     h += '<button class="secenek" data-is="katman-kapat">' + ikon('close') + 'Vazgeç</button></div>';
@@ -96,6 +105,7 @@
       kur: function (el) {
         var ic = E.$('.ic', el);
         function ciz() {
+          if (p.uzlet) { ic.innerHTML = '<div class="uzl-profil"><div class="uzl-ay">' + ikon('moon-waning-crescent') + '</div><b>' + esc(p.isim) + '</b><small>@' + esc(p.kunye) + '</small><p>Bu yoldaş şu an uzlette. Döndüğünde profili yeniden görünecek.</p></div>'; return; }
           ic.innerHTML = E.profilGovde(p, false) + (p.gorebilir ? '<div class="pa"></div>'
             : '<div class="kilit">' + ikon('incognito-circle') + '<b>Bu yoldaşın kimliği izole.</b><br>Kelamlarını yalnızca tasdikli yoldaşları görür.</div>');
           if (p.gorebilir) E.profilSekmeleri(E.$('.pa', ic), p, false, durum);
@@ -346,6 +356,8 @@
     yoldas: ['yesil', 'account-plus', function (k) { return k + ' seni yoldaş edindi.'; }],
     istek: ['sari', 'account-clock', function (k) { return k + ' yoldaşlık isteği gönderdi.'; }],
     kabul: ['yesil', 'account-check', function (k) { return k + ' yoldaşlık isteğini tasdikledi.'; }],
+    nakil: ['yesil', 'repeat', function (k) { return k + ' kelamını nakletti.'; }],
+    iktibas: ['mavi', 'format-quote-open', function (k) { return k + ' kelamını iktibas etti.'; }],
     duyuru: ['mavi', 'bullhorn-outline', function () { return 'ERKAM Duyurusu'; }],
     uyari: ['sari', 'shield-alert-outline', function () { return 'Yönetimden bildirim'; }]
   };
@@ -392,13 +404,14 @@
   // Medya seçildiği an küçültülüp yüklenmeye başlar; Neşret'e basınca "nakşediliyor" ekranı kalanı bekler.
   E.is.nesret = function () {
     var kategori = 'ilim', medya = [], mesgul = false, naksedildi = false, sira = 0, muhurler = [], gundem = [];
+    var iktibas = E._nesirIktibas || null; E._nesirIktibas = null;
     var ben = E.ben || {};
-    var n = E.katmanAc('<div class="nb"><button class="kapat" data-is="katman-kapat" aria-label="Kapat">' + ikon('close') + '</button><h3>Yeni Neşir</h3>' +
+    var n = E.katmanAc('<div class="nb"><button class="kapat" data-is="katman-kapat" aria-label="Kapat">' + ikon('close') + '</button><h3>' + (iktibas ? 'İktibas Et' : 'Yeni Neşir') + '</h3>' +
       '<button class="gonder" disabled>Neşret</button></div>' +
       '<div class="nesir-ic"><div class="nk">' +
         '<div class="nk-bas">' + E.avatar(ben) + '<div><b>' + esc(ben.isim || 'Yoldaş') + E.rozetVar(ben) + '</b><small>@' + esc(ben.kunye || '') + '</small></div></div>' +
-        '<textarea rows="3" maxlength="600" placeholder="Meclise ne nakşetmek istersin?"></textarea>' +
-        '<div class="oz"></div>' +
+        '<textarea rows="3" maxlength="600" placeholder="' + (iktibas ? 'Bu kelama sözünü ekle...' : 'Meclise ne nakşetmek istersin?') + '"></textarea>' +
+        '<div class="oz"></div>' + (iktibas ? '<div class="nk-iktibas">' + E.iktibasHtml(iktibas) + '</div>' : '') +
         '<div class="nk-muhur"><span class="nk-cipler"></span><label class="nk-ekle">' + ikon('pound') + '<input placeholder="mühür ekle" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="31"></label></div>' +
         '<div class="nk-oneri"></div>' +
       '</div></div>' +
@@ -654,7 +667,7 @@
         clearInterval(dongu);
         adim('muhur', 'su', 'Mühür basılıyor');
         E.rpc('kelam_nakset', {
-          p_icerik: alan.value.trim(), p_kategori: kategori, p_muhurler: muhurler, p_gorsel: null, p_ust: null,
+          p_icerik: alan.value.trim(), p_kategori: kategori, p_muhurler: muhurler, p_gorsel: null, p_ust: null, p_iktibas: iktibas ? iktibas.id : null,
           p_medya: medya.map(function (m) { return { tur: m.tur, yol: m.yol, kapak: m.kapak || null, g: m.g || null, y: m.y || null, sure: m.sure || null }; })
         }).then(function (k) {
           naksedildi = true;

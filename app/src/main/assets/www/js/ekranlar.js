@@ -22,32 +22,40 @@
     o = o || {};
     var y = k.yazar || {};
     var sagUst = !o.zamanUstte && k.muhurler && k.muhurler[0] ? '#' + k.muhurler[0] : '';
-    var h = '<div class="kart kelam' + (o.cevap ? ' cevap' : '') + '" data-kelam="' + k.id + '">' +
+    var nk = k.nakleden;
+    var h = '<div class="kart kelam' + (o.cevap ? ' cevap' : '') + (nk ? ' nakilli' : '') + '" data-kelam="' + k.id + '">' +
+      (nk ? '<button class="nakil-ust" data-is="yoldas" data-kunye="' + esc(nk.kunye) + '">' + ikon('repeat') +
+        (E.ben && nk.id === E.ben.id ? 'Sen naklettin' : '<b>' + esc(nk.isim || 'Yoldaş') + '</b> nakletti') + '</button>' : '') +
       '<div class="bas"><button class="kim" data-is="yoldas" data-kunye="' + esc(y.kunye) + '">' + E.avatar(y) +
-      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + E.rozetVar(y) + (o.acik ? '' : '<span class="kz">· ' + esc(E.kelamSure(k.olusturma)) + '</span>') + '</button>' +
+      '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + E.rozetVar(y) + (o.acik ? '' : '<span class="kz">· ' + esc(E.kelamSure(k.olusturma)) + (k.tadil ? ' · tadil edildi' : '') + '</span>') + '</button>' +
       (!o.zamanUstte && k.muhurler && k.muhurler[0]
         ? '<button class="tur tur-muhur" data-is="muhur-ac" data-muhur="' + esc(k.muhurler[0]) + '">' + esc(sagUst) + '</button>'
         : '<span class="tur">' + esc(sagUst) + '</span>') + '</div>' +
       '<div class="metin"' + (o.acik ? '' : ' data-is="kelam-ac" data-id="' + k.id + '"') + '>' + E.metinHtml(k.icerik) + '</div>';
     h += E.medyaHtml(k);
+    if (k.iktibas) h += E.iktibasHtml(k.iktibas);
     if ((o.muhurlu || o.acik) && k.muhurler && k.muhurler.length) {
       h += '<div class="muhurler">' + k.muhurler.map(function (m) {
         return '<button class="muhur" data-is="muhur-ac" data-muhur="' + esc(m) + '">' + ikon('pound') + esc(m) + '</button>';
       }).join('') + '</div>';
     }
-    if (o.acik) h += '<div class="zaman tam">' + E.tamZaman(k.olusturma) + '</div>';
+    if (o.acik) h += '<div class="zaman tam">' + E.tamZaman(k.olusturma) + (k.tadil ? ' · <span class="tadil-n">Tadil edildi</span>' : '') +
+      (k.gorulme ? ' · <b>' + E.sayiKisa(k.gorulme) + '</b> görülme' : '') + '</div>';
     h += '<div class="alt-satir">' +
       '<button data-is="tasdik" data-id="' + k.id + '" class="t' + (k.tasdikledim ? ' acik' : '') + '">' +
       ikon('star-crescent') + '<span>' + (k.tasdik_sayisi || 0) + '</span></button>';
     if (!o.cevap) {
       h += '<button data-is="' + (o.acik ? 'cevap-odak' : 'kelam-ac') + '" data-id="' + k.id + '">' + ikon('handshake-outline') +
         '<span>' + (k.cevap_sayisi || 0) + '</span></button>';
+      h += '<button data-is="nakil" data-id="' + k.id + '" class="n' + (k.nakledildi ? ' acik' : '') + '" aria-label="Nakil">' + ikon('repeat') +
+        '<span>' + (k.nakil_sayisi || 0) + '</span></button>';
       h += '<button data-is="ulak" data-id="' + k.id + '" aria-label="Ulakla gönder">' + ikon('email-fast-outline') + '</button>';
+      if (!o.acik) h += '<span class="gor" aria-label="Görülme">' + ikon('eye-outline') + '<span>' + E.sayiKisa(k.gorulme || 0) + '</span></span>';
     }
     E._kelamVeri[k.id] = k;
     h += '<button data-is="heybe" data-id="' + k.id + '" class="heybe' + (k.heybemde ? ' acik' : '') + '" aria-label="Heybe">' +
       ikon(k.heybemde ? 'bag-personal' : 'bag-personal-outline') + '</button>';
-    if (o.cevap) h += '<button data-is="kelam-menu" data-id="' + k.id + '" data-yazar="' + esc(y.id) + '" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>';
+    if (!o.acik) h += '<button data-is="kelam-menu" data-id="' + k.id + '" data-yazar="' + esc(y.id) + '" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>';
     return h + '</div></div>';
   };
 
@@ -60,7 +68,7 @@
         kap.innerHTML = '<div class="bos-not">' + (o.bosIkon ? ikon(o.bosIkon) : '') + esc(o.bos || 'Henüz bir kelam nakşedilmemiş. İlk sen ol.') + '</div>';
         return;
       }
-      kap.innerHTML = liste.map(function (k) { return E.kelamKart(k, o.kart); }).join('') +
+      kap.innerHTML = liste.filter(function (k) { return !(o.haric && k.id === o.haric && !k.nakleden); }).map(function (k) { return E.kelamKart(k, o.kart); }).join('') +
         (bitti ? '' : '<button class="daha" data-liste-daha>Daha eski kelamlar</button>');
     }
     function yukle(devam) {
@@ -68,7 +76,7 @@
       mesgul = true;
       if (!devam) kap.innerHTML = '<div class="yukleniyor"><div class="cark"></div></div>';
       var p = { p_kaynak: arg.kaynak, p_yazar: arg.yazar || null, p_metin: arg.metin || null, p_limit: 20,
-        p_once: devam && liste.length ? liste[liste.length - 1].olusturma : null };
+        p_once: devam && liste.length ? (liste[liste.length - 1].nakil_tarih || liste[liste.length - 1].olusturma) : null };
       return E.rpc('kelam_listesi', p).then(function (d) {
         d = d || [];
         liste = devam ? liste.concat(d) : d;
@@ -76,6 +84,7 @@
         mesgul = false;
         ciz();
         if (o.yuklendi) o.yuklendi(liste);
+        if (E.gorulmeIzle) E.gorulmeIzle(kap);
       }).catch(function (h) {
         mesgul = false;
         if (devam) { E.tost(E.hataMetni(h), 'kotu'); return; }
@@ -255,10 +264,16 @@
     E.$('#yuzen-kok').innerHTML = '<button class="yuzen" data-is="yeni-mesaj" aria-label="Yeni mesaj">' + ikon('message-plus') + '</button>';
     function ciz() {
       var c = E.veri.mesajCip, q = (E.$('#mesaj-ara').value || '').toLocaleLowerCase('tr');
-      E.$('#mesaj-cip').innerHTML = [['tumu', 'Tümü'], ['okunmayan', 'Okunmayanlar']].map(function (x) {
-        return '<button class="cip' + (c === x[0] ? ' aktif' : '') + '" data-is="mesaj-cip" data-cip="' + x[0] + '">' + x[1] + '</button>';
+      var odaSay = (E.ben && E.ben.okunmamis_oda) || 0;
+      E.$('#mesaj-cip').innerHTML = [['tumu', 'Tümü'], ['okunmayan', 'Okunmayanlar'], ['meclis', 'Meclis Odaları']].map(function (x) {
+        return '<button class="cip' + (c === x[0] ? ' aktif' : '') + '" data-is="mesaj-cip" data-cip="' + x[0] + '">' + x[1] +
+          (x[0] === 'meclis' && odaSay ? '<i class="cip-say">' + Math.min(odaSay, 99) + '</i>' : '') + '</button>';
       }).join('');
       var kap = E.$('#mesaj-liste');
+      E.$('#yuzen-kok').innerHTML = c === 'meclis'
+        ? '<button class="yuzen" data-is="oda-kur" aria-label="Meclis odası kur">' + ikon('account-multiple-plus-outline') + '</button>'
+        : '<button class="yuzen" data-is="yeni-mesaj" aria-label="Yeni mesaj">' + ikon('message-plus') + '</button>';
+      if (c === 'meclis') { if (E.odaListesi) E.odaListesi(kap, q); return; }
       var d = (E.veri.sohbetler || []).filter(function (s) {
         if (c === 'okunmayan' && !(s.okunmamis > 0)) return false;
         if (!q) return true;
@@ -317,11 +332,11 @@
     var s = durum.sekme;
     kap.innerHTML = '<div class="sekmeler">' + [['kelam', 'Kelamlar'], ['cevap', 'Cevaplar'], ['istisare', 'İstişareler']].map(function (x) {
       return '<button class="' + (s === x[0] ? 'aktif' : '') + '" data-psekme="' + x[0] + '">' + x[1] + '</button>';
-    }).join('') + '</div><div class="pl"></div>';
+    }).join('') + '</div>' + (s === 'kelam' && p.seckin ? '<div class="seckin-kap"><div class="seckin-et">' + ikon('bookmark') + 'Seçkin kelam</div>' + E.kelamKart(p.seckin) + '</div>' : '') + '<div class="pl"></div>';
     var arg = s === 'kelam' ? { kaynak: 'yazar', yazar: p.id } : s === 'cevap' ? { kaynak: 'cevap', yazar: p.id } : { kaynak: 'ara', metin: '@' + p.kunye };
     var bos = s === 'kelam' ? (benim ? 'Henüz kelam nakşetmedin.' : 'Bu yoldaş henüz kelam nakşetmemiş.')
       : s === 'cevap' ? 'Henüz verilmiş bir cevap yok.' : 'Henüz bu künyenin anıldığı bir istişare yok.';
-    E.kelamListe(E.$('.pl', kap), arg, { bos: bos, kart: s === 'cevap' ? { zamanUstte: true } : null });
+    E.kelamListe(E.$('.pl', kap), arg, { bos: p.seckin && s === 'kelam' ? '' : bos, haric: p.seckin ? p.seckin.id : null, kart: s === 'cevap' ? { zamanUstte: true } : null });
     E.$('.sekmeler', kap).onclick = function (o) {
       var b = o.target.closest('[data-psekme]');
       if (!b) return;
@@ -409,6 +424,7 @@
       '<button class="satir duz" data-is="sifre-guncelle">' + ikon('key-chain') + '<span class="orta"><b>Şifre Güncelle</b></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz" data-is="cihazlar-ac">' + ikon('devices') + '<span class="orta"><b>Oturum Açık Cihazlar</b><span>Hangi telefonlarda giriş yapılı</span></span>' + ikon('chevron-right', 'ok') + '</button>' +
       '<button class="satir duz kirmizi" data-is="cikis">' + ikon('logout') + '<span class="orta"><b>Meclisten Ayrıl (Çıkış Yap)</b></span></button></div>' +
+      '<div class="grup"><button class="satir duz" data-is="uzlet-ac">' + ikon('moon-waning-crescent') + '<span class="orta"><b>Uzlete Çekil</b><span>Hesabını silmeden bir süre gizle</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="grup"><button class="satir duz kirmizi" data-is="hesap-sil">' + ikon('account-remove') + '<span class="orta"><b>Hesabımı Kalıcı Olarak Sil</b></span></button></div>' +
       '<div class="grup"><button class="satir duz" data-is="guncelleme-denetle">' + ikon('cellphone-arrow-down') + '<span class="orta"><b>Güncellemeleri Denetle</b><span>Şu an: ERKAM v' + esc(surum) + '</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="surum">ERKAM v' + esc(surum) + '</div>';
