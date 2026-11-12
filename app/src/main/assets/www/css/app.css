@@ -1388,3 +1388,9 @@ body.emn-acik #tost { z-index: 90; }
 .obl-ayril svg { width: 20px; height: 20px; }
 .oda-av { display: block; } .oda-av.tek { display: flex; } .oda-av .avatar { box-sizing: border-box; }
 .oda-av .avatar { background: var(--vurgu-zemin) !important; border: 2px solid var(--kart); } .oda-av .avatar svg { width: 70%; height: 70%; }
+
+/* kart başı ⋮ (düzen 4) */
+.kelam .bas .bas-menu { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin: -6px -8px -6px -4px; border-radius: 50%; color: var(--soluk2); flex: none; }
+.kelam .bas .bas-menu svg { width: 21px; height: 21px; }
+.kelam .bas .bas-menu:active { background: var(--kutu); }
+.kelam.cevap .alt-satir { justify-content: flex-start; }

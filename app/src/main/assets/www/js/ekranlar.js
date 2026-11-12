@@ -30,7 +30,8 @@
       '<b>' + esc(y.isim || 'Yoldaş') + '</b>' + E.rozetVar(y) + (o.acik ? '' : '<span class="kz">· ' + esc(E.kelamSure(k.olusturma)) + (k.tadil ? ' · tadil edildi' : '') + '</span>') + '</button>' +
       (!o.zamanUstte && k.muhurler && k.muhurler[0]
         ? '<button class="tur tur-muhur" data-is="muhur-ac" data-muhur="' + esc(k.muhurler[0]) + '">' + esc(sagUst) + '</button>'
-        : '<span class="tur">' + esc(sagUst) + '</span>') + '</div>' +
+        : '<span class="tur">' + esc(sagUst) + '</span>') +
+      (o.acik ? '' : '<button class="bas-menu" data-is="kelam-menu" data-id="' + k.id + '" data-yazar="' + esc(y.id) + '" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>') + '</div>' +
       '<div class="metin"' + (o.acik ? '' : ' data-is="kelam-ac" data-id="' + k.id + '"') + '>' + E.metinHtml(k.icerik) + '</div>';
     h += E.medyaHtml(k);
     if (k.iktibas) h += E.iktibasHtml(k.iktibas);
@@ -49,13 +50,9 @@
         '<span>' + (k.cevap_sayisi || 0) + '</span></button>';
       h += '<button data-is="nakil" data-id="' + k.id + '" class="n' + (k.nakledildi ? ' acik' : '') + '" aria-label="Nakil">' + ikon('repeat') +
         '<span>' + (k.nakil_sayisi || 0) + '</span></button>';
-      h += '<button data-is="ulak" data-id="' + k.id + '" aria-label="Ulakla gönder">' + ikon('email-fast-outline') + '</button>';
       if (!o.acik) h += '<span class="gor" aria-label="Görülme">' + ikon('eye-outline') + '<span>' + E.sayiKisa(k.gorulme || 0) + '</span></span>';
     }
     E._kelamVeri[k.id] = k;
-    h += '<button data-is="heybe" data-id="' + k.id + '" class="heybe' + (k.heybemde ? ' acik' : '') + '" aria-label="Heybe">' +
-      ikon(k.heybemde ? 'bag-personal' : 'bag-personal-outline') + '</button>';
-    if (!o.acik) h += '<button data-is="kelam-menu" data-id="' + k.id + '" data-yazar="' + esc(y.id) + '" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>';
     return h + '</div></div>';
   };
 
@@ -125,6 +122,10 @@
   E.is.heybe = function (el) {
     var id = el.getAttribute('data-id');
     return E.rpc('heybe_degistir', { p_kelam: id }).then(function (acik) {
+      if (E._kelamVeri[id]) E._kelamVeri[id].heybemde = acik;
+      var ust = E.yigin.length && E.yigin[E.yigin.length - 1].veri;
+      if (ust && ust.kelam && ust.kelam.id === id) ust.kelam.heybemde = acik;
+      E.tost(acik ? 'Heybene eklendi.' : 'Heybeden çıkarıldı.', 'iyi');
       kelamDomGuncelle(id, function (kart) {
         var b = E.$('.alt-satir .heybe', kart);
         if (!b) return;

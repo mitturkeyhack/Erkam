@@ -54,6 +54,8 @@
     var benim = E.ben && yazarId === E.ben.id, yonetim = E.ben && E.ben.rol === 'yonetim';
     var h = '<div class="yi" style="padding:10px 0 16px">';
     var kv = (E._kelamVeri || {})[id] || (ustSayfa && E.yigin.length && E.yigin[E.yigin.length - 1].veri ? E.yigin[E.yigin.length - 1].veri.kelam : null);
+    if (kv && !kv.ust_id) h += '<button class="secenek" data-is="menu-ulak" data-id="' + id + '">' + ikon('email-fast-outline') + 'Ulakla Gönder<small>Görsel kart olarak paylaş</small></button>';
+    h += '<button class="secenek" data-is="menu-heybe" data-id="' + id + '">' + ikon(kv && kv.heybemde ? 'bag-personal' : 'bag-personal-outline') + (kv && kv.heybemde ? 'Heybeden Çıkar' : 'Heybeye Ekle') + '<small>Sonra okumak için sakla</small></button>';
     if (benim && kv) {
       var kalan = 15 - Math.floor((Date.now() - new Date(kv.olusturma).getTime()) / 60000);
       if (kalan > 0) h += '<button class="secenek" data-is="kelam-tadil" data-id="' + id + '">' + ikon('file-document-edit-outline') + 'Tadil Et<small>' + kalan + ' dk kaldı</small></button>';
@@ -72,6 +74,8 @@
     if (!t || !t.veri) return;
     kelamMenu(t.veri.kelam.id, t.veri.kelam.yazar && t.veri.kelam.yazar.id, true);
   };
+  E.is['menu-ulak'] = function (el) { E.katmanKapat(); return E.is.ulak(el); };
+  E.is['menu-heybe'] = function (el) { E.katmanKapat(); return E.is.heybe(el); };
   E.is['kelam-menu'] = function (el) { kelamMenu(el.getAttribute('data-id'), el.getAttribute('data-yazar'), false); };
   E.is['kelam-sil'] = function (el) {
     var id = el.getAttribute('data-id'), ust = el.getAttribute('data-ust') === '1';
