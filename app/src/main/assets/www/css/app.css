@@ -1475,3 +1475,18 @@ button.ist-s:active, button.ist-s.bekle { border-color: var(--vurgu); background
 .ym-kota-uy svg { width: 20px; height: 20px; flex: none; }
 .ym-kota-alt { display: flex; gap: 6px; color: var(--soluk); font-size: 12.5px; line-height: 1.45; }
 .ym-kota-alt svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }
+
+/* ---------- Engel / sessize alma ---------- */
+.eng-bas { display: flex; align-items: center; gap: 12px; padding: 4px 22px 14px; }
+.eng-bas .avatar { width: 46px; height: 46px; }
+.eng-bas b { display: block; font-size: 17px; } .eng-bas small { color: var(--soluk); font-size: 14px; }
+.eng-profil .cerceve { margin-top: 16px; padding: 10px 22px; }
+.eng-serit { display: flex; align-items: center; gap: 10px; margin: 10px 14px 0; padding: 10px 14px; border-radius: 14px; background: var(--kutu); color: var(--yazi2); font-size: 14px; }
+.eng-serit svg { width: 20px; height: 20px; color: var(--soluk); flex: none; }
+.eng-serit span { flex: 1; }
+.eng-serit button { color: var(--vurgu); font-weight: 700; font-size: 14px; }
+.eng-bilgi { display: flex; gap: 10px; margin: 14px; padding: 14px; border-radius: 16px; background: var(--kutu); color: var(--yazi2); font-size: 14px; line-height: 1.5; }
+.eng-bilgi svg { width: 24px; height: 24px; color: var(--vurgu); flex: none; }
+.eng-s { display: flex; align-items: center; gap: 12px; }
+.eng-s .avatar { width: 42px; height: 42px; flex: none; }
+.eng-s .cerceve.kucuk { padding: 7px 12px; font-size: 13px; border-radius: 12px; white-space: nowrap; }

@@ -418,6 +418,8 @@
       '<div class="bolum">SİSTEM TERCİHLERİ</div><div class="grup">' +
       '<button class="satir" data-is="ayar-fecr"><span class="ikon-kutu">' + ikon('theme-light-dark') + '</span><span class="orta"><b>Fecr Modu (Açık Tema)</b><span>Meclis arayüzünü aydınlatır</span></span>' + anahtar(E.tercih('fecr') !== '0') + '</button>' +
       '<button class="satir" data-is="ayar-bildirim"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Meclis Bildirimleri</b><span>Mesaj, cevap, tasdik ve yoldaşlıkları telefonuna bildir</span></span>' + anahtar(E.tercih('bildirim') !== '0') + '</button></div>' +
+      '<div class="bolum">MECLİS HUZURU</div><div class="grup">' +
+      '<button class="satir duz" data-is="engeller-ac">' + ikon('account-cancel-outline') + '<span class="orta"><b>Engellenenler ve Sessize Alınanlar</b><span>Kimi görmek istemediğini sen seçersin</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="bolum">EMANET VE HUKUK</div><div class="grup">' +
       '<button class="satir duz" data-is="emanet-ac">' + ikon('shield-check-outline') + '<span class="orta"><b>Emanet ve Hukuk</b><span>KVKK, gizlilik, şartlar, verilerimi indir</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="bolum">HESAP YÖNETİMİ</div><div class="grup">' +
@@ -428,7 +430,7 @@
       '<button class="satir duz kirmizi" data-is="cikis">' + ikon('logout') + '<span class="orta"><b>Meclisten Ayrıl (Çıkış Yap)</b></span></button></div>' +
       '<div class="grup"><button class="satir duz" data-is="uzlet-ac">' + ikon('moon-waning-crescent') + '<span class="orta"><b>Uzlete Çekil</b><span>Hesabını silmeden bir süre gizle</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="grup"><button class="satir duz kirmizi" data-is="hesap-sil">' + ikon('account-remove') + '<span class="orta"><b>Hesabımı Kalıcı Olarak Sil</b></span></button></div>' +
-      '<div class="grup"><button class="satir duz" data-is="guncelleme-denetle">' + ikon('cellphone-arrow-down') + '<span class="orta"><b>Güncellemeleri Denetle</b><span>Şu an: ERKAM v' + esc(surum) + '</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
+      (E.playSurumu && E.playSurumu() ? '' : '<div class="grup"><button class="satir duz" data-is="guncelleme-denetle">' + ikon('cellphone-arrow-down') + '<span class="orta"><b>Güncellemeleri Denetle</b><span>Şu an: ERKAM v' + esc(surum) + '</span></span>' + ikon('chevron-right', 'ok') + '</button></div>') +
       '<div class="surum">ERKAM v' + esc(surum) + '</div>';
   };
   E.is['ayar-fecr'] = function () {

@@ -172,6 +172,10 @@ public class MainActivity extends Activity {
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         kok.addView(web, new FrameLayout.LayoutParams(-1, -1));
         setContentView(kok);
+        if (Build.VERSION.SDK_INT >= 33) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::geriTusu);
+        }
 
         try {
             w.setStatusBarColor(Color.TRANSPARENT);
@@ -399,6 +403,7 @@ public class MainActivity extends Activity {
         }
     }
     private void guncellemeyiKur() {
+        if (BuildConfig.PLAY) return; // Play sürümünü yalnızca Play günceller
         File f = guncellemeDosyasi();
         if (!f.exists()) { guncellemeBildir("hata", 0, "Dosya bulunamadı"); return; }
         if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
@@ -533,6 +538,7 @@ public class MainActivity extends Activity {
         // ---------- uygulama içi güncelleme ----------
         @JavascriptInterface
         public void guncellemeIndir(String adres) {
+            if (BuildConfig.PLAY) return;
             new Thread(() -> guncellemeyiIndir(adres)).start();
         }
 
@@ -662,6 +668,9 @@ public class MainActivity extends Activity {
                 return j.toString();
             } catch (Throwable e) { return "{}"; }
         }
+
+        @JavascriptInterface
+        public boolean playSurumu() { return BuildConfig.PLAY; }
 
         @JavascriptInterface
         public String surum() {

@@ -114,6 +114,7 @@
     islem_gecersiz: 'Bu işlem yapılamadı.',
     uzlette: 'Bu yoldaş şu an uzlette; mesaj alamıyor.',
     istisare_bitti: 'Bu istişare sonuçlandı.',
+    engelli: 'Bu yoldaşla aranızda engel var.',
     istisare_secenek: 'En az iki farklı seçenek yazmalısın (en çok dört).',
     istisare_yok: 'Bu istişare artık yok.',
     oda_yok: 'Bu meclis odasına erişimin yok.',

@@ -7,6 +7,8 @@
 
   function no(s) { var m = String(s || '').match(/(\d+)\.(\d+)\.(\d+)/); return m ? (+m[1]) * 1e6 + (+m[2]) * 1e3 + (+m[3]) : 0; }
   function buSurum() { try { return (window.Android && Android.surum) ? Android.surum() : ''; } catch (e) { return ''; } }
+  // Play'den kurulan sürümü Play günceller; kendi güncelleyicimiz susar
+  E.playSurumu = function () { try { return !!(window.Android && Android.playSurumu && Android.playSurumu()); } catch (e) { return false; } };
   function bugun() { return new Date().toISOString().slice(0, 10); }
   function mb(b) { return b ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : ''; }
 
@@ -19,6 +21,7 @@
 
   // elle: Nizam'dan basıldıysa sonuç ne olursa olsun haber ver
   E.guncellemeDenetle = function (elle) {
+    if (E.playSurumu()) { if (elle) E.tost('Güncellemeler Google Play üzerinden gelir.'); return Promise.resolve(); }
     var simdiki = buSurum();
     if (!simdiki) { if (elle) E.tost('Güncelleme yalnızca Android uygulamasında denetlenir.'); return Promise.resolve(); }
     return fetch(API, { headers: { Accept: 'application/vnd.github+json' } }).then(function (r) {

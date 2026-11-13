@@ -66,6 +66,11 @@
     }
     if (benim || yonetim) h += '<button class="secenek kirmizi" data-is="kelam-sil" data-id="' + id + '" data-ust="' + (ustSayfa ? 1 : 0) + '">' + ikon('delete-outline') + (benim ? 'Kelamı Sil' : 'Kelamı Kaldır (Yönetim)') + '</button>';
     if (!benim) h += '<button class="secenek" data-is="kelam-sikayet" data-id="' + id + '">' + ikon('flag-outline') + 'Şikâyet Et</button>';
+    if (!benim && kv && kv.yazar && kv.yazar.id) {
+      E._engelKisi = kv.yazar;
+      h += '<button class="secenek" data-is="engel-yap" data-tur="sessiz" data-id="' + esc(kv.yazar.id) + '">' + ikon('volume-off') + '@' + esc(kv.yazar.kunye) + ' adlı yoldaşı sessize al</button>';
+      h += '<button class="secenek kirmizi" data-is="engel-yap" data-tur="engel" data-id="' + esc(kv.yazar.id) + '">' + ikon('account-cancel-outline') + '@' + esc(kv.yazar.kunye) + ' adlı yoldaşı engelle</button>';
+    }
     h += '<button class="secenek" data-is="katman-kapat">' + ikon('close') + 'Vazgeç</button></div>';
     E.katmanAc(h, 'yaprak kisa');
   }
@@ -105,12 +110,20 @@
     var p = null, durum = { sekme: 'kelam' };
     var tanim = {
       ad: 'yoldas',
-      html: E.sayfaBasligi('<div class="ad">Yoldaş Profili</div>') + '<div class="ic"><div class="yukleniyor"><div class="cark"></div></div></div>',
+      html: E.sayfaBasligi('<div class="ad">Yoldaş Profili</div>', '<button class="ikb" data-is="yoldas-menu" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>') + '<div class="ic"><div class="yukleniyor"><div class="cark"></div></div></div>',
       kur: function (el) {
         var ic = E.$('.ic', el);
         function ciz() {
+          var en = p.engel || {};
+          if (en.ben === 'engel' || en.o) {
+            ic.innerHTML = '<div class="uzl-profil eng-profil"><div class="uzl-ay">' + ikon('account-cancel-outline') + '</div><b>' + esc(p.isim) + '</b><small>@' + esc(p.kunye) + '</small>' +
+              (en.ben === 'engel' ? '<p>Bu yoldaşı engelledin. Birbirinizin kelamlarını göremez, mesajlaşamazsınız.</p><button class="cerceve" data-is="engel-kaldir" data-id="' + esc(p.id) + '">Engeli Kaldır</button>'
+                : '<p>Bu yoldaş seni engellemiş. Kelamlarını göremez, ona mesaj gönderemezsin.</p>') + '</div>';
+            return;
+          }
           if (p.uzlet) { ic.innerHTML = '<div class="uzl-profil"><div class="uzl-ay">' + ikon('moon-waning-crescent') + '</div><b>' + esc(p.isim) + '</b><small>@' + esc(p.kunye) + '</small><p>Bu yoldaş şu an uzlette. Döndüğünde profili yeniden görünecek.</p></div>'; return; }
-          ic.innerHTML = E.profilGovde(p, false) + (p.gorebilir ? '<div class="pa"></div>'
+          ic.innerHTML = (en.ben === 'sessiz' ? '<div class="eng-serit">' + ikon('volume-off') + '<span>Bu yoldaşı sessize aldın.</span><button data-is="engel-kaldir" data-id="' + esc(p.id) + '">Sessizden çıkar</button></div>' : '') +
+            E.profilGovde(p, false) + (p.gorebilir ? '<div class="pa"></div>'
             : '<div class="kilit">' + ikon('incognito-circle') + '<b>Bu yoldaşın kimliği izole.</b><br>Kelamlarını yalnızca tasdikli yoldaşları görür.</div>');
           if (p.gorebilir) E.profilSekmeleri(E.$('.pa', ic), p, false, durum);
         }

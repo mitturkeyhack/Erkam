@@ -6,14 +6,30 @@ def runNo = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
 
 android {
     namespace 'com.mitturkeyhack.erkam'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.mitturkeyhack.erkam"
         minSdk 26
-        targetSdk 35
+        targetSdk 36
         versionCode runNo
         versionName "0.1." + runNo
+    }
+
+    buildFeatures { buildConfig true }
+
+    // github: GitHub Releases'tan dağıtılan, kendini güncelleyen sürüm
+    // play: Google Play'e yüklenen AAB; güncellemeyi Play yapar, kendi güncelleyicisi kapalı
+    flavorDimensions "dagitim"
+    productFlavors {
+        github {
+            dimension "dagitim"
+            buildConfigField "boolean", "PLAY", "false"
+        }
+        play {
+            dimension "dagitim"
+            buildConfigField "boolean", "PLAY", "true"
+        }
     }
 
     // İmza anahtarı depoda tutulmaz; derleme makinesi her seferinde geçici bir anahtar üretir
