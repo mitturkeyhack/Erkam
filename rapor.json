@@ -1,0 +1,57 @@
+{
+  "zaman": "2026-11-13T10:13:39.697Z",
+  "surum": "41",
+  "adimlar": [
+    {
+      "ad": "01 uygulama açılıyor, giriş ekranı geliyor",
+      "tamam": true,
+      "ms": 2039,
+      "not": {
+        "supabase": "object",
+        "istemci": true
+      }
+    },
+    {
+      "ad": "02 sunucu ayarı okunuyor",
+      "tamam": true,
+      "ms": 1074,
+      "not": {
+        "durum": 200,
+        "eposta_tasdiki_zorunlu": true,
+        "kayit_kapali": false
+      }
+    },
+    {
+      "ad": "03 künye sorgusu (girişsiz çağrı)",
+      "tamam": true,
+      "ms": 737,
+      "not": [
+        true,
+        false
+      ]
+    },
+    {
+      "ad": "04 girişsiz kişi veriye ulaşamaz",
+      "tamam": true,
+      "ms": 276,
+      "not": "42501 permission denied for function kelam_listesi"
+    },
+    {
+      "ad": "05 yanlış şifre reddediliyor",
+      "tamam": true,
+      "ms": 749,
+      "not": "E-posta veya şifre hatalı."
+    }
+  ],
+  "konsol": [
+    "A [error] Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "A [HTTP 404] http://127.0.0.1:8123/favicon.ico",
+    "A [HTTP 401] https://xzbprcsiwaoxcmzklayu.supabase.co/rest/v1/rpc/kelam_listesi",
+    "A [error] Failed to load resource: the server responded with a status of 401 ()",
+    "A [HTTP 400] https://xzbprcsiwaoxcmzklayu.supabase.co/auth/v1/token?grant_type=password",
+    "A [error] Failed to load resource: the server responded with a status of 400 ()"
+  ],
+  "eposta_tasdiki_zorunlu": true,
+  "not": "E-posta tasdiki zorunlu olduğu için oturum gerektiren adımlar atlandı.",
+  "ozet": "5/5 adım geçti"
+}
