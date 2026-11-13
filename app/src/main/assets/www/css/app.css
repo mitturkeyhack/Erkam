@@ -1490,3 +1490,76 @@ button.ist-s:active, button.ist-s.bekle { border-color: var(--vurgu); background
 .eng-s { display: flex; align-items: center; gap: 12px; }
 .eng-s .avatar { width: 42px; height: 42px; flex: none; }
 .eng-s .cerceve.kucuk { padding: 7px 12px; font-size: 13px; border-radius: 12px; white-space: nowrap; }
+
+/* ---------- Bildirimler (kartlı) ---------- */
+.bl-yaprak { background: var(--zemin); }
+.bl-bas { flex: none; padding: 20px 16px 6px 22px; }
+.bl-ust { display: flex; align-items: center; gap: 8px; }
+.bl-ust h3 { flex: 1; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
+.bl-ib { width: 42px; height: 42px; border-radius: 50%; background: var(--kart); color: var(--yazi2); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08); }
+.bl-ib svg { width: 22px; height: 22px; }
+.bl-alt { color: var(--soluk); font-size: 14px; margin-top: 2px; min-height: 4px; }
+.bl-alt b { color: var(--vurgu); }
+.bl-cips { display: flex; gap: 8px; overflow-x: auto; margin: 12px -16px 0 -4px; padding: 0 16px 4px 4px; scrollbar-width: none; }
+.bl-cips::-webkit-scrollbar { display: none; }
+.bl-cip { flex: none; padding: 8px 15px; border-radius: 20px; background: var(--kart); color: var(--yazi2); font-size: 14px; font-weight: 600;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); display: flex; align-items: center; }
+.bl-cip.on { background: var(--yazi); color: var(--zemin); }
+.bl-cip i { font-style: normal; background: var(--vurgu); color: #fff; border-radius: 10px; padding: 0 7px; font-size: 12px; margin-left: 6px; line-height: 18px; }
+.bl-yi { padding-bottom: 10px; }
+.bl-bol { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 8px 22px; font-size: 13px; font-weight: 800; color: var(--soluk); letter-spacing: 0.8px; }
+.bl-x { width: 28px; height: 28px; border-radius: 50%; background: var(--cizgi-ince); color: var(--soluk); display: flex; align-items: center; justify-content: center; }
+.bl-x svg { width: 16px; height: 16px; }
+.bl-tem { display: flex; align-items: center; gap: 6px; background: var(--tehlike-zemin); color: var(--tehlike); font-weight: 800; font-size: 13px; padding: 6px 12px; border-radius: 16px;
+  letter-spacing: 0; animation: cik 0.15s ease-out; }
+.bl-tem svg { width: 17px; height: 17px; }
+.bl-k { position: relative; margin: 0 12px 8px; border-radius: 20px; }
+.bl-sil { position: absolute; right: 0; top: 0; bottom: 0; width: 120px; background: var(--tehlike); border-radius: 20px; color: #fff; display: flex; flex-direction: column;
+  align-items: flex-end; justify-content: center; padding-right: 26px; font-size: 13px; font-weight: 700; gap: 2px; }
+.bl-sil svg { width: 24px; height: 24px; margin-right: 1px; }
+.bl-sil { visibility: hidden; }
+.bl-k.kay .bl-sil { visibility: visible; }
+.bl-k.esik .bl-sil { background: #dc2626; }
+.bl-on { position: relative; display: flex; align-items: center; gap: 13px; padding: 13px 14px; background: var(--kart); border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05); transition: transform 0.2s ease; }
+.bl-av { position: relative; flex: none; width: 50px; height: 50px; padding: 0; }
+.bl-av .avatar { width: 50px; height: 50px; }
+.bl-roz { position: absolute; right: -3px; bottom: -3px; width: 23px; height: 23px; border-radius: 50%; border: 2.5px solid var(--kart); display: flex; align-items: center;
+  justify-content: center; color: #fff; background: var(--vurgu); }
+.bl-roz svg { width: 12px; height: 12px; }
+.bl-roz.mavi { background: var(--mavi); } .bl-roz.mor { background: #8b5cf6; } .bl-roz.sari { background: var(--uyari); }
+.bl-yuv { flex: none; width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.bl-yuv svg { width: 26px; height: 26px; }
+.bl-yuv.mavi { background: rgba(59, 130, 246, 0.14); color: var(--mavi); }
+.bl-yuv.sari { background: rgba(245, 158, 11, 0.15); color: var(--uyari); }
+.bl-yuv.yesil { background: var(--vurgu-zemin); color: var(--vurgu); }
+.bl-orta { flex: 1; min-width: 0; }
+.bl-orta b { display: block; font-weight: 400; font-size: 15.5px; line-height: 1.35; }
+.bl-orta b i { font-style: normal; font-weight: 700; }
+.bl-orta p { margin: 2px 0 0; color: var(--yazi2); font-size: 14px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.bl-orta > span { display: block; margin-top: 3px; color: var(--soluk2); font-size: 13px; }
+.bl-orta .ikili { display: flex; gap: 8px; margin-top: 10px; }
+.bl-orta .ikili button { padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 14px; }
+.bl-kuc { flex: none; width: 46px; height: 46px; border-radius: 12px; overflow: hidden; background: var(--vurgu-zemin); color: var(--vurgu); display: flex; align-items: center; justify-content: center; }
+.bl-kuc img { width: 100%; height: 100%; object-fit: cover; }
+.bl-kuc svg { width: 22px; height: 22px; }
+.bl-pr { flex: none; background: var(--vurgu); color: #fff; font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 14px; }
+.bl-nk { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--vurgu); }
+.bl-snack-kok { position: absolute; left: 14px; right: 14px; bottom: 18px; z-index: 3; pointer-events: none; }
+.bl-snack { pointer-events: auto; background: #0f172a; color: #fff; border-radius: 16px; padding: 6px 8px 6px 18px; display: flex; align-items: center; font-size: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); animation: cik 0.2s ease-out; }
+html:not([data-tema="acik"]) .bl-snack { background: #f8fafc; color: #0f172a; }
+.bl-snack span { flex: 1; }
+.bl-snack button { display: flex; align-items: center; gap: 6px; color: #34d399; font-weight: 800; padding: 10px; }
+html:not([data-tema="acik"]) .bl-snack button { color: #059669; }
+.bl-snack button svg { width: 19px; height: 19px; }
+.bl-menu-kok { position: absolute; inset: 0; z-index: 4; }
+.bl-menu-perde { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.25); }
+.bl-menu { position: absolute; right: 14px; top: 70px; width: 280px; background: var(--kart); border-radius: 20px; padding: 8px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
+  animation: cik 0.15s ease-out; }
+.bl-menu button { width: 100%; display: flex; align-items: center; gap: 13px; padding: 13px 12px; border-radius: 14px; font-size: 15.5px; font-weight: 600; text-align: left; color: var(--yazi); }
+.bl-menu button svg { width: 22px; height: 22px; flex: none; color: var(--yazi2); }
+.bl-menu button small { display: block; color: var(--soluk); font-size: 12.5px; font-weight: 400; margin-top: 1px; }
+.bl-menu button.krm, .bl-menu button.krm svg { color: var(--tehlike); }
+.bl-ay { height: 1px; background: var(--cizgi-ince); margin: 4px 10px; }

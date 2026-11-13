@@ -365,40 +365,163 @@
   };
 
   // ---------- Bildirimler ----------
-  var BILDIRIM = {
-    hosgeldin: ['sari', 'shield-check', function () { return 'ERKAM ağına hoş geldin yoldaş!'; }],
-    tasdik: ['yesil', 'star-crescent', function (k) { return k + ' kelamını tasdikledi.'; }],
-    cevap: ['yesil', 'handshake-outline', function (k) { return k + ' kelamına cevap verdi.'; }],
-    etiket: ['mavi', 'at', function (k) { return k + ' seni bir kelamda etiketledi.'; }],
-    yoldas: ['yesil', 'account-plus', function (k) { return k + ' seni yoldaş edindi.'; }],
-    istek: ['sari', 'account-clock', function (k) { return k + ' yoldaşlık isteği gönderdi.'; }],
-    kabul: ['yesil', 'account-check', function (k) { return k + ' yoldaşlık isteğini tasdikledi.'; }],
-    nakil: ['yesil', 'repeat', function (k) { return k + ' kelamını nakletti.'; }],
-    iktibas: ['mavi', 'format-quote-open', function (k) { return k + ' kelamını iktibas etti.'; }],
-    duyuru: ['mavi', 'bullhorn-outline', function () { return 'ERKAM Duyurusu'; }],
-    uyari: ['sari', 'shield-alert-outline', function () { return 'Yönetimden bildirim'; }]
+  // kişi bildirimleri: [rozet simgesi, rozet rengi, metin]
+  var KISI_BIL = {
+    tasdik: ['star-crescent', 'yesil', 'kelamını tasdikledi.'],
+    cevap: ['handshake-outline', 'mavi', 'kelamına cevap verdi.'],
+    etiket: ['at', 'mavi', 'seni bir kelamda etiketledi.'],
+    yoldas: ['account-plus', 'mor', 'seni yoldaş edindi.'],
+    istek: ['account-clock', 'sari', 'yoldaşlık isteği gönderdi.'],
+    kabul: ['account-check', 'yesil', 'yoldaşlık isteğini tasdikledi.'],
+    nakil: ['repeat', 'yesil', 'kelamını nakletti.'],
+    iktibas: ['format-quote-open', 'mavi', 'kelamını iktibas etti.']
   };
+  // ERKAM'dan gelen bildirimler: [renk, simge, başlık]
+  var SISTEM_BIL = {
+    hosgeldin: ['sari', 'shield-check', 'ERKAM ağına hoş geldin yoldaş!'],
+    duyuru: ['mavi', 'bullhorn-outline', 'ERKAM Duyurusu'],
+    uyari: ['sari', 'shield-alert-outline', 'Yönetimden bildirim']
+  };
+  var SUZGEC = [['hepsi', 'Tümü'], ['tasdik', 'Tasdik'], ['cevap', 'Cevap'], ['yoldas', 'Yoldaşlık']];
+  var SUZ_TUR = { tasdik: ['tasdik'], cevap: ['cevap', 'etiket', 'iktibas', 'nakil'], yoldas: ['yoldas', 'istek', 'kabul'] };
+
   E.is.bildirimler = function () {
-    var y = E.katmanAc('<div class="yb"><h3>Bildirimler</h3><button data-is="katman-kapat" aria-label="Kapat">' + ikon('close') + '</button></div>' +
-      '<div class="yi"><div class="yukleniyor"><div class="cark"></div></div></div>');
-    var kap = E.$('.yi', y);
-    function yukle() {
-      return E.rpc('bildirim_listesi', { p_limit: 50 }).then(function (d) {
-        d = d || [];
-        kap.innerHTML = d.length ? d.map(function (b) {
-          var t = BILDIRIM[b.tur] || BILDIRIM.hosgeldin, k = b.kimden || {};
-          return '<div class="bildirim' + (b.okundu ? '' : ' yeni') + '" data-tur="' + b.tur + '" data-kelam="' + esc(b.kelam_id || '') + '" data-kunye="' + esc(k.kunye || '') + '">' +
-            '<span class="yuv ' + t[0] + '">' + ikon(t[1]) + '</span><div class="orta"><b>' + esc(t[2](k.isim || 'Bir yoldaş')) + '</b>' +
-            (b.metin ? '<p class="b-metin">' + esc(b.metin) + '</p>' : '') + '<span>' + esc(E.once(b.olusturma)) + '</span>' +
-            (b.tur === 'istek' ? '<div class="ikili"><button class="dolu" data-istek="1" data-kisi="' + esc(k.id) + '">Tasdik Et</button><button class="cerceve" data-istek="0" data-kisi="' + esc(k.id) + '">Reddet</button></div>' : '') +
-            '</div>' + (b.okundu ? '' : '<span class="nk"></span>') + '</div>';
-        }).join('') : '<div class="bos-not">' + ikon('bell-outline') + 'Henüz bir bildirimin yok.</div>';
-        if (d.some(function (b) { return !b.okundu; })) {
-          E.rpc('bildirimleri_okundu').then(function () { E.ben.okunmamis_bildirim = 0; E.rozetCiz(); }).catch(function () { /* önemsiz */ });
+    var y = E.katmanAc('<div class="bl-bas"><div class="bl-ust"><h3>Bildirimler</h3>' +
+      '<button class="bl-ib" data-bl="menu" aria-label="Seçenekler">' + ikon('dots-vertical') + '</button>' +
+      '<button class="bl-ib" data-is="katman-kapat" aria-label="Kapat">' + ikon('close') + '</button></div>' +
+      '<div class="bl-alt"></div><div class="bl-cips"></div></div>' +
+      '<div class="yi bl-yi"><div class="yukleniyor"><div class="cark"></div></div></div><div class="bl-snack-kok"></div>', 'yaprak bl-yaprak');
+    var kap = E.$('.bl-yi', y), cips = E.$('.bl-cips', y), alt = E.$('.bl-alt', y), snackKok = E.$('.bl-snack-kok', y);
+    var liste = [], suz = 'hepsi', acikBolum = null, bekleyen = null, yeniSayi = 0;
+
+    function kisiMi(b) { return !!(KISI_BIL[b.tur] && b.kimden && b.kimden.id); }
+    function bolumu(b) {
+      if (!b._okundu) return 'yeni';
+      return (Date.now() - new Date(b.olusturma).getTime()) < 7 * 86400000 ? 'hafta' : 'once';
+    }
+    function kart(b) {
+      var k = b.kimden || {}, sol, metin, sag = '', alt2 = '';
+      if (kisiMi(b)) {
+        var t = KISI_BIL[b.tur];
+        sol = '<button class="bl-av" data-profil="' + esc(k.kunye || '') + '" aria-label="Profil">' + E.avatar(k) +
+          '<span class="bl-roz ' + t[1] + '">' + ikon(t[0]) + '</span></button>';
+        metin = '<b><i>' + esc(k.isim || 'Bir yoldaş') + '</i> ' + t[2] + '</b>' + (b.metin ? '<p>“' + esc(b.metin) + '”</p>' : '');
+        if (b.kelam_id) {
+          var on = b.onizleme || {};
+          sag = on.gorsel ? '<span class="bl-kuc"><img src="' + esc(E.gorselUrl(on.gorsel)) + '" alt="" loading="lazy"></span>'
+            : '<span class="bl-kuc">' + ikon('format-quote-open') + '</span>';
+        } else if (b.tur === 'yoldas' || b.tur === 'kabul') {
+          sag = '<button class="bl-pr" data-profil="' + esc(k.kunye || '') + '">Profil</button>';
         }
+        if (b.tur === 'istek') alt2 = '<div class="ikili"><button class="dolu" data-istek="1" data-kisi="' + esc(k.id) + '">Tasdik Et</button><button class="cerceve" data-istek="0" data-kisi="' + esc(k.id) + '">Reddet</button></div>';
+      } else {
+        var s = SISTEM_BIL[b.tur] || SISTEM_BIL.hosgeldin;
+        sol = '<span class="bl-yuv ' + s[0] + '">' + ikon(s[1]) + '</span>';
+        metin = '<b><i>' + s[2] + '</i></b>' + (b.metin ? '<p>' + esc(b.metin) + '</p>' : '');
+      }
+      return '<div class="bl-k" data-id="' + b.id + '"><div class="bl-sil">' + ikon('delete-outline') + 'Sil</div>' +
+        '<div class="bl-on" data-kelam="' + esc(b.kelam_id || '') + '" data-kunye="' + esc(k.kunye || '') + '">' + sol +
+        '<div class="bl-orta">' + metin + '<span>' + esc(E.once(b.olusturma)) + '</span>' + alt2 + '</div>' + sag +
+        (b._okundu ? '' : '<span class="bl-nk"></span>') + '</div></div>';
+    }
+    function gorunen() {
+      return liste.filter(function (b) {
+        if (bekleyen && bekleyen.idler.indexOf(b.id) >= 0) return false;
+        return suz === 'hepsi' || (SUZ_TUR[suz] || []).indexOf(b.tur) >= 0;
+      });
+    }
+    function ciz() {
+      var tum = liste.filter(function (b) { return !(bekleyen && bekleyen.idler.indexOf(b.id) >= 0); });
+      alt.innerHTML = tum.length ? (yeniSayi ? '<b>' + yeniSayi + ' yeni</b> bildirimin var' : 'Hepsini okudun') : '';
+      cips.innerHTML = tum.length ? SUZGEC.map(function (s) {
+        return '<button class="bl-cip' + (suz === s[0] ? ' on' : '') + '" data-suz="' + s[0] + '">' + s[1] +
+          (s[0] === 'hepsi' && yeniSayi ? '<i>' + yeniSayi + '</i>' : '') + '</button>';
+      }).join('') : '';
+      var g = gorunen();
+      if (!g.length) {
+        kap.innerHTML = '<div class="bos-not">' + ikon('bell-outline') + (tum.length ? 'Bu türde bildirimin yok.' : 'Henüz bir bildirimin yok.') + '</div>';
+        return;
+      }
+      var adlar = { yeni: 'YENİ', hafta: 'BU HAFTA', once: 'DAHA ÖNCE' }, h = '';
+      ['yeni', 'hafta', 'once'].forEach(function (bl) {
+        var o = g.filter(function (b) { return bolumu(b) === bl; });
+        if (!o.length) return;
+        h += '<div class="bl-bol"><span>' + adlar[bl] + '</span>' + (acikBolum === bl
+          ? '<button class="bl-tem" data-temizle="' + bl + '">' + ikon('delete-sweep-outline') + 'Temizle</button>'
+          : '<button class="bl-x" data-bolum="' + bl + '" aria-label="Bölümü temizle">' + ikon('close') + '</button>') + '</div>' +
+          o.map(kart).join('');
+      });
+      kap.innerHTML = h + '<div style="height:90px"></div>';
+    }
+    function yukle() {
+      return E.rpc('bildirim_listesi', { p_limit: 60 }).then(function (d) {
+        liste = (d || []).map(function (b) { b._okundu = b.okundu; return b; });
+        yeniSayi = liste.filter(function (b) { return !b.okundu; }).length;
+        ciz();
+        if (yeniSayi) E.rpc('bildirimleri_okundu').then(function () { E.ben.okunmamis_bildirim = 0; E.rozetCiz(); }).catch(function () { /* önemsiz */ });
       }).catch(function (h) { kap.innerHTML = '<div class="bos-not">' + ikon('wifi-off') + esc(E.hataMetni(h)) + '</div>'; });
     }
-    kap.onclick = function (o) {
+
+    // silme: önce gizle, birkaç saniye "Geri al" fırsatı tanı, sonra sunucudan sil
+    function kesinlestir() {
+      if (!bekleyen) return;
+      var b = bekleyen; bekleyen = null; clearTimeout(b.zaman); snackKok.innerHTML = '';
+      E.rpc('bildirim_sil', { p_idler: b.idler }).then(function () {
+        liste = liste.filter(function (x) { return b.idler.indexOf(x.id) < 0; });
+      }).catch(function (h) { E.tost(E.hataMetni(h), 'kotu'); ciz(); });
+    }
+    function sil(idler) {
+      if (!idler.length) return;
+      kesinlestir();
+      yeniSayi = Math.max(0, yeniSayi - liste.filter(function (b) { return !b._okundu && idler.indexOf(b.id) >= 0; }).length);
+      bekleyen = { idler: idler, zaman: setTimeout(kesinlestir, 4500) };
+      acikBolum = null;
+      ciz();
+      snackKok.innerHTML = '<div class="bl-snack"><span>' + (idler.length > 1 ? idler.length + ' bildirim silindi' : 'Bildirim silindi') + '</span>' +
+        '<button data-bl="geri">' + ikon('undo') + 'Geri al</button></div>';
+    }
+    y.parentNode._kapaninca = kesinlestir;
+
+    function menu() {
+      var m = E.$('.bl-menu', y);
+      if (m) { m.parentNode.removeChild(m); return; }
+      var d = document.createElement('div');
+      d.className = 'bl-menu-kok';
+      d.innerHTML = '<div class="bl-menu-perde" data-bl="menu"></div><div class="bl-menu">' +
+        '<button data-bl="ayar">' + ikon('bell-cog-outline') + '<span>Bildirim ayarları<small>Hangi bildirimler telefona gelsin</small></span></button>' +
+        '<div class="bl-ay"></div><button class="krm" data-bl="hepsini">' + ikon('delete-sweep-outline') + '<span>Tümünü temizle<small>Geri alınamaz, önce sorar</small></span></button></div>';
+      y.appendChild(d);
+    }
+    function menuKapat() { var m = E.$('.bl-menu-kok', y); if (m) m.parentNode.removeChild(m); }
+
+    y.onclick = function (o) {
+      var bl = o.target.closest('[data-bl]');
+      if (bl) {
+        var ne = bl.getAttribute('data-bl');
+        if (ne === 'menu') { if (E.$('.bl-menu-kok', y)) menuKapat(); else menu(); }
+        else if (ne === 'geri') { if (bekleyen) { clearTimeout(bekleyen.zaman); bekleyen = null; snackKok.innerHTML = ''; yeniSayi = liste.filter(function (b) { return !b._okundu; }).length; ciz(); } }
+        else if (ne === 'ayar') { menuKapat(); E.katmanKapat(); E.git('nizam'); }
+        else if (ne === 'hepsini') {
+          menuKapat();
+          E.sor('Bildirimler temizlensin mi?', 'Bütün bildirimlerin silinir. Bu geri alınamaz.', 'Temizle', true).then(function (evet) {
+            if (!evet) return;
+            kesinlestir();
+            E.rpc('bildirim_sil', { p_idler: null }).then(function () { liste = []; yeniSayi = 0; ciz(); E.tost('Bildirimler temizlendi.', 'iyi'); })
+              .catch(function (h) { E.tost(E.hataMetni(h), 'kotu'); });
+          });
+        }
+        return;
+      }
+      if (!kap.contains(o.target) && !cips.contains(o.target)) return;
+      if (kayiyor) return;
+      var sz = o.target.closest('[data-suz]');
+      if (sz) { suz = sz.getAttribute('data-suz'); acikBolum = null; ciz(); return; }
+      var bx = o.target.closest('[data-bolum]');
+      if (bx) { acikBolum = bx.getAttribute('data-bolum'); ciz(); return; }
+      var tm = o.target.closest('[data-temizle]');
+      if (tm) { var b2 = tm.getAttribute('data-temizle'); sil(gorunen().filter(function (b) { return bolumu(b) === b2; }).map(function (b) { return b.id; })); return; }
+      var sl = o.target.closest('.bl-sil');
+      if (sl) { sil([+sl.parentNode.getAttribute('data-id')]); return; }
       var ist = o.target.closest('[data-istek]');
       if (ist) {
         ist.disabled = true;
@@ -407,13 +530,57 @@
         }).catch(function (h) { ist.disabled = false; E.tost(E.hataMetni(h), 'kotu'); });
         return;
       }
-      var s = o.target.closest('.bildirim');
+      if (acikBolum) { acikBolum = null; ciz(); }
+      var pr = o.target.closest('[data-profil]');
+      if (pr && pr.getAttribute('data-profil')) { kesinlestir(); E.katmanKapat(); E.yoldasSayfa(pr.getAttribute('data-profil')); return; }
+      var s = o.target.closest('.bl-on');
       if (!s) return;
+      if (s.style.transform) { s.style.transform = ''; setTimeout(function () { s.parentNode.classList.remove('kay'); }, 220); return; }
       var kelam = s.getAttribute('data-kelam'), kunye = s.getAttribute('data-kunye');
+      if (!kelam && !kunye) return;
+      kesinlestir();
       E.katmanKapat();
       if (kelam) E.kelamSayfa(kelam);
-      else if (kunye) E.yoldasSayfa(kunye);
+      else E.yoldasSayfa(kunye);
     };
+
+    // sola kaydırınca sil
+    var kayiyor = false, bas = null;
+    kap.addEventListener('touchstart', function (o) {
+      var on = o.target.closest('.bl-on');
+      if (!on || o.touches.length !== 1) { bas = null; return; }
+      bas = { on: on, x: o.touches[0].clientX, y: o.touches[0].clientY, dx: 0, yon: null };
+      on.style.transition = 'none';
+    }, { passive: true });
+    kap.addEventListener('touchmove', function (o) {
+      if (!bas) return;
+      var dx = o.touches[0].clientX - bas.x, dy = o.touches[0].clientY - bas.y;
+      if (!bas.yon) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; bas.yon = Math.abs(dx) > Math.abs(dy) ? 'yatay' : 'dikey'; }
+      if (bas.yon !== 'yatay') return;
+      if (o.cancelable) o.preventDefault();
+      bas.dx = Math.min(0, dx);
+      bas.on.parentNode.classList.add('kay');
+      bas.on.style.transform = 'translateX(' + bas.dx + 'px)';
+      bas.on.parentNode.classList.toggle('esik', bas.dx < -110);
+    }, { passive: false });
+    function birak() {
+      if (!bas) return;
+      var b = bas; bas = null;
+      b.on.style.transition = '';
+      if (b.yon === 'yatay') { kayiyor = true; setTimeout(function () { kayiyor = false; }, 60); }
+      if (b.dx < -110) {
+        b.on.style.transform = 'translateX(-110%)';
+        setTimeout(function () { sil([+b.on.parentNode.getAttribute('data-id')]); }, 160);
+      } else if (b.dx < -50) {
+        b.on.style.transform = 'translateX(-96px)';   // "Sil" düğmesi açık kalsın
+      } else {
+        b.on.style.transform = '';
+        setTimeout(function () { if (!b.on.style.transform) b.on.parentNode.classList.remove('kay'); }, 220);
+      }
+    }
+    kap.addEventListener('touchend', birak);
+    kap.addEventListener('touchcancel', birak);
+
     yukle();
   };
 
