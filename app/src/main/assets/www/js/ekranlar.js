@@ -417,7 +417,7 @@
       '<button class="satir" data-is="ayar-izole"><span class="ikon-kutu">' + ikon('incognito-circle') + '</span><span class="orta"><b>İzole Kimlik (Gizli Hesap)</b><span>Profilini sadece tasdikli yoldaşlar görür</span></span>' + anahtar(b.izole) + '</button></div>' +
       '<div class="bolum">SİSTEM TERCİHLERİ</div><div class="grup">' +
       '<button class="satir" data-is="ayar-fecr"><span class="ikon-kutu">' + ikon('theme-light-dark') + '</span><span class="orta"><b>Fecr Modu (Açık Tema)</b><span>Meclis arayüzünü aydınlatır</span></span>' + anahtar(E.tercih('fecr') !== '0') + '</button>' +
-      '<button class="satir" data-is="ayar-bildirim"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Meclis Bildirimleri</b><span>Mesaj, cevap, tasdik ve yoldaşlıkları telefonuna bildir</span></span>' + anahtar(E.tercih('bildirim') !== '0') + '</button></div>' +
+      '<button class="satir" data-is="bildirim-ayar-ac"><span class="ikon-kutu">' + ikon('bell-ring') + '</span><span class="orta"><b>Bildirim Ayarları</b><span>' + (E.tercih('bildirim') !== '0' ? 'Hangi bildirimlerin telefonuna geleceğini seç' : 'Telefon bildirimleri kapalı') + '</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="bolum">MECLİS HUZURU</div><div class="grup">' +
       '<button class="satir duz" data-is="engeller-ac">' + ikon('account-cancel-outline') + '<span class="orta"><b>Engellenenler ve Sessize Alınanlar</b><span>Kimi görmek istemediğini sen seçersin</span></span>' + ikon('chevron-right', 'ok') + '</button></div>' +
       '<div class="bolum">EMANET VE HUKUK</div><div class="grup">' +

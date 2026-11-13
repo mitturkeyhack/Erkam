@@ -500,7 +500,7 @@
         var ne = bl.getAttribute('data-bl');
         if (ne === 'menu') { if (E.$('.bl-menu-kok', y)) menuKapat(); else menu(); }
         else if (ne === 'geri') { if (bekleyen) { clearTimeout(bekleyen.zaman); bekleyen = null; snackKok.innerHTML = ''; yeniSayi = liste.filter(function (b) { return !b._okundu; }).length; ciz(); } }
-        else if (ne === 'ayar') { menuKapat(); E.katmanKapat(); E.git('nizam'); }
+        else if (ne === 'ayar') { menuKapat(); E.katmanKapat(); E.is['bildirim-ayar-ac'](); }
         else if (ne === 'hepsini') {
           menuKapat();
           E.sor('Bildirimler temizlensin mi?', 'Bütün bildirimlerin silinir. Bu geri alınamaz.', 'Temizle', true).then(function (evet) {
